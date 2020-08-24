@@ -1,0 +1,13 @@
+[package]
+name = "cement"
+version = "0.1.0"
+authors = ["Lyzh <enterindex@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+name = "malti"
+path = "src/main.rs"
+
+[dependencies]
+pest = "2.1.3"
+pest_derive = "2.1.0"

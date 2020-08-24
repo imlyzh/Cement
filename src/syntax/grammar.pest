@@ -1,0 +1,76 @@
+//
+// Created by intellij-pest on 2020-08-25
+// grammar
+// Author: enter
+//
+
+unit = { (!EOI ~ sexpr)* ~ EOI }
+
+sexpr =
+    { list
+    | atomic
+    }
+
+list =
+    { "(" ~ sexpr* ~ ")"
+    | "[" ~ sexpr* ~ "]"
+    }
+
+atomic =
+    { bool_lit
+    | char_lit
+    | string_lit
+    | number_lit
+    | symbol
+    }
+
+symbol = ${ (!(keyword | "\"" | "\'" | "(" | ")" | "[" | "]") ~ ANY)+ }
+
+number_lit = ${ ("+" | "-")? ~ uns_number_lit }
+
+uns_number_dec = _ { ASCII_DIGIT+ }
+uns_number_hex = _ { "0x" ~ ASCII_HEX_DIGIT+ }
+uns_number_bin = _ { "0x" ~ ASCII_BIN_DIGIT+ }
+
+uns_number_lit = $
+    { uns_number_hex
+    | uns_number_bin
+    | uns_number_dec
+    }
+
+bool_lit = ${ kw_false | kw_true }
+
+keyword = ${ kw_false | kw_true }
+
+kw_false = ${ "false" }
+kw_true = ${ "true" }
+
+string_lit = $ { "\"" ~ (escape | (!("\\" | "\"") ~ ANY)+)* ~ "\""}
+
+char_lit = $ { "\'" ~ (escape | ANY) ~ "\'" }
+
+escape = _{ "\\\\"
+          | "\\\""
+          | "\\'"
+          | "\\n"
+          | "\\r"
+          | "\\t"
+          }
+
+
+line_comment = _{
+    ";" ~ (!NEWLINE ~ ANY)* ~ NEWLINE?
+}
+
+block_comment = _{
+    "{" ~ (block_comment | (!"}" ~ ANY))* ~ "}"
+}
+
+COMMENT = _{ line_comment | block_comment }
+
+WHITESPACE = _
+    { " "
+    | "\t"
+    | WHITE_SPACE
+    | NEWLINE
+    }
