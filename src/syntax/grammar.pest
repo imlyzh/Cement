@@ -24,8 +24,6 @@ atomic =
     | symbol
     }
 
-symbol = ${ (!(keyword | "\"" | "\'" | "(" | ")" | "[" | "]") ~ ANY)+ }
-
 number_lit = ${ ("+" | "-")? ~ uns_number_lit }
 
 uns_number_dec = _ { ASCII_DIGIT+ }
@@ -56,6 +54,8 @@ escape = _{ "\\\\"
           | "\\r"
           | "\\t"
           }
+
+symbol = ${ (!(keyword | WHITESPACE | "\"" | "\'" | "(" | ")" | "[" | "]") ~ ANY)+ }
 
 
 line_comment = _{

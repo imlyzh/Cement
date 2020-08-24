@@ -1,15 +1,16 @@
+
+use std::str::FromStr;
+
+use pest::iterators::{Pair, Pairs};
+use pest_derive::*;
+
 use super::sexpr::*;
 use crate::syntax::utils::{escape_str, register_intern_str, str2char};
-use pest::iterators::Pair;
-use pest_derive::*;
-use std::collections::VecDeque;
-use std::io::Chain;
-use std::iter::FromIterator;
-use std::str::FromStr;
+
 
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
-struct Cement {}
+pub struct Cement {}
 
 impl ParseFrom<Rule> for SExpr {
     fn parse(pair: Pair<Rule>) -> Self {
@@ -46,9 +47,18 @@ impl ParseFrom<Rule> for Atom {
     }
 }
 
-fn parser<'a>(pair: Pair<Rule>) -> ListPia {
+pub fn parse_unit(pair: Pair<Rule>) -> Option<SExpr> {
     match pair.as_rule() {
-        Rule::unit => List::parse(pair.into_inner().next().unwrap()).0,
+        Rule::sexpr => Some(SExpr::parse(pair.clone().into_inner().next().unwrap())),
+        // Rule::unit => SExpr::parse(),
+        Rule::EOI => None,
         _ => unreachable!(),
     }
+}
+
+pub fn parse(input: &str) -> Result<ListPia, ()> {
+    use pest::Parser;
+    let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input).map_err(|_e| ())?;
+    let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
+    Ok(result.collect())
 }

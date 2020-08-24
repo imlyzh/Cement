@@ -1,3 +1,3 @@
 mod utils;
-mod sexpr;
-mod parser;
+pub mod sexpr;
+pub mod parser;
