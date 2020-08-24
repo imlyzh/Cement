@@ -1,4 +1,3 @@
-
 use std::str::FromStr;
 
 use pest::iterators::{Pair, Pairs};
@@ -6,7 +5,7 @@ use pest_derive::*;
 
 use super::sexpr::*;
 use crate::syntax::utils::{escape_str, register_intern_str, str2char};
-
+use pest::error::Error;
 
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
@@ -50,15 +49,19 @@ impl ParseFrom<Rule> for Atom {
 pub fn parse_unit(pair: Pair<Rule>) -> Option<SExpr> {
     match pair.as_rule() {
         Rule::sexpr => Some(SExpr::parse(pair.clone().into_inner().next().unwrap())),
-        // Rule::unit => SExpr::parse(),
         Rule::EOI => None,
         _ => unreachable!(),
     }
 }
 
-pub fn parse(input: &str) -> Result<ListPia, ()> {
+pub type ParseError = Error<Rule>;
+
+#[derive(Debug)]
+pub struct CompilerError (pub ParseError);
+
+pub fn parse(input: &str) -> Result<ListPia, CompilerError> {
     use pest::Parser;
-    let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input).map_err(|_e| ())?;
+    let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input).map_err(|e| CompilerError(e))?;
     let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
     Ok(result.collect())
 }
