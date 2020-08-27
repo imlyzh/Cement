@@ -32,7 +32,7 @@ fn rule_match(rule: &SExpr, rexpr: &SExpr) -> Result<MatchRule, ()> {
             }
             Ok((r, VecDeque::new()))
         }
-        _ => unimplemented!(),
+        _ => Err(()),
     }
 }
 
