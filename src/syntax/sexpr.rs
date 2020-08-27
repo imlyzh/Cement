@@ -10,6 +10,12 @@ pub struct Pos {
 #[derive(Debug, Clone)]
 pub struct SExpr (pub RSExpr, pub Pos);
 
+impl SExpr {
+    pub fn get_raw(&self) -> RSExpr {
+        self.0.clone()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum RSExpr {
     NonAtomic(List),
@@ -21,7 +27,7 @@ pub struct List (pub ListPia);
 
 pub type ListPia = VecDeque<SExpr>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum Atom {
     // Int(&'a str),
     // Float(&'a str),
