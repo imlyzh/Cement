@@ -14,8 +14,8 @@ pub struct Cement {}
 impl ParseFrom<Rule> for SExpr {
     fn parse(pair: Pair<Rule>) -> Self {
         let rs_expr = match pair.as_rule() {
-            Rule::list => RSExpr::NonAtomic(List::parse(pair.clone().into_inner().next().unwrap())),
-            Rule::atomic => RSExpr::Atomic(Atom::parse(pair.clone().into_inner().next().unwrap())),
+            Rule::list => RSExpr::NonAtomic(List::parse(pair.clone())),
+            Rule::atomic => RSExpr::Atomic(Atom::parse(pair.clone())),
             _ => unreachable!(),
         };
         let pos = Pos {
@@ -28,13 +28,18 @@ impl ParseFrom<Rule> for SExpr {
 
 impl ParseFrom<Rule> for List {
     fn parse(pair: Pair<Rule>) -> Self {
-        let lst: ListPia = pair.into_inner().map(SExpr::parse).collect();
+        let lst: ListPia = pair
+            .into_inner()
+            .flat_map(|x| x.into_inner())
+            .map(SExpr::parse)
+            .collect();
         List(lst)
     }
 }
 
 impl ParseFrom<Rule> for Atom {
     fn parse(pair: Pair<Rule>) -> Self {
+        let pair = pair.into_inner().next().unwrap();
         match pair.as_rule() {
             Rule::bool_lit => Atom::Bool(bool::from_str(pair.as_str()).unwrap()),
             Rule::char_lit => Atom::Char(str2char(&escape_str(pair.as_str()))),
@@ -57,7 +62,7 @@ pub fn parse_unit(pair: Pair<Rule>) -> Option<SExpr> {
 pub type ParseError = Error<Rule>;
 
 #[derive(Debug)]
-pub struct CompilerError (pub ParseError);
+pub struct CompilerError(pub ParseError);
 
 pub fn parse(input: &str) -> Result<ListPia, CompilerError> {
     use pest::Parser;
