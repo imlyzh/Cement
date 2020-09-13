@@ -1,5 +1,5 @@
-pub mod preprocesser;
-pub mod syntax;
+mod preprocesser;
+mod syntax;
 
 use crate::syntax::parser::*;
 use std::io::{stdin, stdout, Write};

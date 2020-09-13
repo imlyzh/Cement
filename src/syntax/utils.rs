@@ -10,7 +10,7 @@ pub fn escape_char(i: char) -> char {
         'n' => '\n',
         'r' => '\r',
         't' => '\t',
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
