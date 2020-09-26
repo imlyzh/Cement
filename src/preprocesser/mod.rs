@@ -18,12 +18,25 @@ fn match_atom(rule: &Atom, expr: &Atom) -> Result<Option<(String, RSExpr)>, ()> 
     }
 }
 
-fn match_list<'a, T1: Iterator<Item = &'a SExpr>, T2: Iterator<Item = &'a SExpr>>(a: T1, b: T2) {
-    a.zip(b)
+fn match_list<'a, T1: Iterator<Item = &'a SExpr>, T2: Iterator<Item = &'a SExpr>>(
+    a: T1,
+    b: T2,
+) -> Result<MatchRule, ()> {
+    let r = a
+        .zip(b)
         .map(|(a, b)| rule_match(a, b))
         .collect::<Result<Vec<MatchRule>, ()>>()
         .unwrap();
-    todo!("match_list 没写完")
+    /*Ok(r.iter().rfold(
+        (VecDeque::new(), VecDeque::new()),|
+        (mut p, mut extend),
+        (mut xp, mut xextend)| {
+            p.append(&mut xp.clone());
+            extend.append(&mut xextend.clone());
+            (p.clone(), extend.clone())
+        },
+    ))*/
+    todo!("别问，问就是鸽了")
 }
 
 fn rule_match(rule: &SExpr, rexpr: &SExpr) -> Result<MatchRule, ()> {
@@ -46,10 +59,10 @@ fn rule_match(rule: &SExpr, rexpr: &SExpr) -> Result<MatchRule, ()> {
                 let append_values = &a.0.iter().collect::<Vec<_>>()[a.0.len() - 2..a.0.len()];
                 let a = &a.0.iter().collect::<Vec<_>>()[0..a.0.len() - 2];
                 let a = a.iter().map(|x| *x);
-                match_list(a, b);
+                let mlr = match_list(a, b);
             } else {
                 let a = a.0.iter().map(identity);
-                match_list(a, b);
+                let mlr = match_list(a, b);
             }
             unimplemented!()
         }
