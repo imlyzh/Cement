@@ -76,7 +76,9 @@ pub enum Atom {
     // Fraction(String),
     Bool(bool),
     Char(char),
-    Num(String),
+    Int(i64),
+    Uint(u64),
+    Float(f64),
     Str(String),
     Sym(String),
 }
@@ -86,7 +88,9 @@ impl std::fmt::Display for Atom {
         match self {
             Atom::Bool(v) => f.write_str(&v.to_string()),
             Atom::Char(v) => f.write_str(&v.to_string()),
-            Atom::Num(v) => f.write_str(&v.to_string()),
+            Atom::Int(v) => f.write_str(&v.to_string()),
+            Atom::Uint(v) => f.write_str(&v.to_string()),
+            Atom::Float(v) => f.write_str(&v.to_string()),
             Atom::Str(v) => f.write_str(&v.to_string()),
             Atom::Sym(v) => f.write_str(&v.to_string()),
         }
@@ -107,12 +111,12 @@ impl Atom {
         }
     }
 
-    pub fn get_num(&self) -> Option<String> {
+    /*pub fn get_num(&self) -> Option<String> {
         match self {
             Atom::Num(s) => Some(s.clone()),
             _ => None,
         }
-    }
+    }*/
 
     pub fn get_char(&self) -> Option<char> {
         match self {

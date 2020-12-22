@@ -20,21 +20,27 @@ atomic =
     { bool_lit
     | char_lit
     | string_lit
-    | number_lit
+    | float_lit
+    | int_lit
+    | uint_lit
     | symbol
     }
 
-number_lit = ${ ("+" | "-")? ~ uns_number_lit }
+float_lit = ${ int_lit ~ "." ~ uint_lit }
 
-uns_number_dec = _ { ASCII_DIGIT+ }
-uns_number_hex = _ { "0x" ~ ASCII_HEX_DIGIT+ }
-uns_number_bin = _ { "0x" ~ ASCII_BIN_DIGIT+ }
+int_lit = ${ ("+" | "-")? ~ uint_lit }
+
+uint_lit = ${ uns_number_lit }
 
 uns_number_lit = $
     { uns_number_hex
     | uns_number_bin
     | uns_number_dec
     }
+
+uns_number_dec = _ { ASCII_DIGIT+ }
+uns_number_hex = _ { "0x" ~ ASCII_HEX_DIGIT+ }
+uns_number_bin = _ { "0x" ~ ASCII_BIN_DIGIT+ }
 
 bool_lit = ${ kw_false | kw_true }
 

@@ -3,7 +3,7 @@ use std::str::FromStr;
 use pest::iterators::{Pair, Pairs};
 use pest_derive::*;
 
-use super::sexpr::*;
+use super::values::*;
 use crate::syntax::utils::{escape_str, register_intern_str, str2char};
 use pest::error::Error;
 
@@ -41,11 +41,13 @@ impl ParseFrom<Rule> for Atom {
     fn parse(pair: Pair<Rule>) -> Self {
         let pair = pair.into_inner().next().unwrap();
         match pair.as_rule() {
-            Rule::bool_lit => Atom::Bool(bool::from_str(pair.as_str()).unwrap()),
-            Rule::char_lit => Atom::Char(str2char(&escape_str(pair.as_str()))),
-            Rule::string_lit => Atom::Str(escape_str(pair.as_str())),
-            Rule::number_lit => Atom::Num(pair.as_str().to_string()),
             Rule::symbol => Atom::Sym(register_intern_str(pair.as_str())),
+            Rule::string_lit => Atom::Str(escape_str(pair.as_str())),
+            Rule::bool_lit => Atom::Bool(pair.as_str().parse().unwrap()),
+            Rule::char_lit => Atom::Char(str2char(&escape_str(pair.as_str()))),
+            Rule::uint_lit => Atom::Float(pair.as_str().parse().unwrap()),
+            Rule::int_lit => Atom::Float(pair.as_str().parse().unwrap()),
+            Rule::float_lit => Atom::Float(pair.as_str().parse().unwrap()),
             _ => unreachable!(),
         }
     }
