@@ -1,3 +1,4 @@
+mod utils;
 pub mod parser;
 pub mod sexpr;
-mod utils;
+pub mod pattern_match;

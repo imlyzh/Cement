@@ -1,2 +1,2 @@
-pub mod preprocesser;
-pub mod syntax;
+//pub mod syntax;
+//mod evalution;

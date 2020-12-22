@@ -4,13 +4,13 @@ version = "0.1.0"
 authors = ["Lyzh <enterindex@gmail.com>"]
 edition = "2018"
 
-[lib]
-name = "maltlib"
-path = "src/lib.rs"
-
 [[bin]]
-name = "malti"
+name = "cementi"
 path = "src/main.rs"
+
+[lib]
+name = "cementlib"
+path = "src/lib.rs"
 
 [dependencies]
 pest = "2.1.3"

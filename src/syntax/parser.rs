@@ -18,11 +18,11 @@ impl ParseFrom<Rule> for SExpr {
             Rule::atomic => RSExpr::Atomic(Atom::parse(pair.clone())),
             _ => unreachable!(),
         };
-        let pos = Pos {
-            start: pair.as_span().start(),
-            end: pair.as_span().end(),
-        };
-        SExpr(rs_expr, pos)
+        // let pos = Pos {
+            // start: pair.as_span().start(),
+            // end: pair.as_span().end(),
+        // };
+        SExpr(rs_expr)
     }
 }
 

@@ -1,14 +1,23 @@
 use pest::iterators::Pair;
 use std::collections::VecDeque;
 
+/*
 #[derive(Debug, Clone, Default)]
 pub struct Pos {
     pub start: usize,
     pub end: usize,
 }
+*/
 
 #[derive(Debug, Clone)]
-pub struct SExpr(pub RSExpr, pub Pos);
+pub struct SExpr(pub RSExpr);
+
+impl std::fmt::Display for SExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 
 impl SExpr {
     pub fn get_raw(&self) -> RSExpr {
@@ -20,6 +29,15 @@ impl SExpr {
 pub enum RSExpr {
     NonAtomic(List),
     Atomic(Atom),
+}
+
+impl std::fmt::Display for RSExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RSExpr::Atomic(a) => a.fmt(f),
+            RSExpr::NonAtomic(l) => l.fmt(f)
+        }
+    }
 }
 
 impl RSExpr {
@@ -40,18 +58,39 @@ impl RSExpr {
 #[derive(Debug, Clone)]
 pub struct List(pub ListPia);
 
+impl std::fmt::Display for List {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let list = self.0.iter();
+        let str_list: Vec<String> = list.map(SExpr::to_string).collect();
+        let retstr = format!("({})", str_list.join(" "));
+        f.write_str(&retstr)
+    }
+}
+
 pub type ListPia = VecDeque<SExpr>;
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
 pub enum Atom {
-    // Int(&'a str),
-    // Float(&'a str),
-    // Fraction(&'a str),
+    // Int(String),
+    // Float(String),
+    // Fraction(String),
     Bool(bool),
     Char(char),
     Num(String),
     Str(String),
     Sym(String),
+}
+
+impl std::fmt::Display for Atom {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Atom::Bool(v) => f.write_str(&v.to_string()),
+            Atom::Char(v) => f.write_str(&v.to_string()),
+            Atom::Num(v) => f.write_str(&v.to_string()),
+            Atom::Str(v) => f.write_str(&v.to_string()),
+            Atom::Sym(v) => f.write_str(&v.to_string()),
+        }
+    }
 }
 
 impl Atom {
