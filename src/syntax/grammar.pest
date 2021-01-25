@@ -6,6 +6,8 @@
 
 unit = { (!EOI ~ sexpr)* ~ EOI }
 
+repl_unit = { !EOI ~ sexpr ~ EOI }
+
 sexpr =
 	{ list
 	| nil_lit

@@ -17,14 +17,8 @@ fn main() {
 		let mut a = String::new();
 		stdin().read_line(&mut a).unwrap();
 		// parse
-		let ast = parse(&a);
-		let ast = ast.expect("syntax error");
-		for i in ast {
-			
-			let res: Result<_, ()> = Ok(i);
-			
-			println!("> {:?}", res);
-			// println!("> {}", res.map_or("error.".to_string(), |v| v.to_string()));
-		}
+		let res = repl_parse(&a);
+		println!("> {:?}", res);
+		// println!("> {}", res.map_or("error.".to_string(), |v| v.to_string()));
 	}
 }

@@ -1,13 +1,6 @@
 use pest::iterators::Pair;
 use std::{collections::LinkedList, fmt::Display};
 
-/*
-#[derive(Debug, Clone, Default)]
-pub struct Pos {
-	pub start: usize,
-	pub end: usize,
-}
-*/
 
 #[derive(Debug, Clone)]
 pub enum Value {

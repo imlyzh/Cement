@@ -1,4 +1,5 @@
 use pest::iterators::{Pair, Pairs};
+use pest::Parser;
 use pest_derive::*;
 
 use super::values::*;
@@ -64,8 +65,17 @@ pub type ParseError = Error<Rule>;
 pub struct CompilerError(pub ParseError);
 
 pub fn parse(input: &str) -> Result<ListPia, CompilerError> {
-    use pest::Parser;
     let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input).map_err(|e| CompilerError(e))?;
-    let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
+	let result =
+		pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
     Ok(result.collect())
+}
+
+pub fn repl_parse(input: &str) -> Result<Value, CompilerError> {
+	let pair = Cement::parse(Rule::repl_unit, input)
+		.map_err(|e| CompilerError(e))?
+		.next().unwrap().into_inner()
+		.next().unwrap().into_inner()
+		.next().unwrap();
+    Ok(Value::parse_from(pair))
 }
