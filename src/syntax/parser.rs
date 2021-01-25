@@ -1,10 +1,10 @@
-use std::sync::Arc;
+use std::{cell::RefCell, collections::LinkedList, sync::Arc};
 
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::*;
 
-use super::values::*;
+use crate::values::*;
 use crate::syntax::utils::{escape_str, str2char};
 use pest::error::Error;
 
@@ -48,7 +48,9 @@ impl ParseFrom<Rule> for Symbol {
             id: pair.as_str().to_string(),
             line,
             colum,
-            pos,
+			pos,
+			scope: RefCell::new(LinkedList::new()),
+		    // value: RefCell::new(None)
         }
     }
 }

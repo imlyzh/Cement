@@ -1,5 +1,7 @@
 use pest::iterators::Pair;
-use std::{collections::LinkedList, fmt::Display, sync::Arc};
+use std::{cell::RefCell, collections::LinkedList, convert::identity, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc};
+
+use crate::context::FunctionDef;
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -14,6 +16,7 @@ pub enum Value {
 	Sym(Arc<Symbol>),
 	List(Arc<List>),
 	Vec(Arc<Vec<Value>>),
+	Function(Arc<FunctionDef>),
 }
 
 /*
@@ -57,6 +60,21 @@ pub struct Symbol {
 	pub line: usize,
 	pub colum: usize,
 	pub pos: usize,
+	pub scope: RefCell<LinkedList<Arc<Symbol>>>,
+	// pub value: RefCell<Option<Value>>,
+}
+
+impl Symbol {
+	pub fn new(i: &str) -> Self {
+		Symbol {
+		    id: i.to_string(),
+		    line: 0,
+		    colum: 0,
+		    pos: 0,
+		    scope: RefCell::new(LinkedList::new()),
+		    // value: RefCell::new(None),
+		}
+	}
 }
 
 impl PartialEq for Symbol {
@@ -69,6 +87,12 @@ impl Display for Symbol {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		self.id.fmt(f)
 	}
+}
+
+impl Hash for Symbol {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
 }
 
 

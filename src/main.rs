@@ -1,5 +1,8 @@
+mod values;
+mod context;
 mod syntax;
 mod evalution;
+mod preprocess;
 
 use std::{
 	io::{stdin, stdout, Write},
