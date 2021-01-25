@@ -2,7 +2,7 @@ use pest::iterators::Pair;
 use std::{collections::LinkedList, fmt::Display};
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
 	Nil,
 	Bool(bool),
@@ -37,7 +37,7 @@ impl std::fmt::Display for Value {
 
 pub type ListPia = LinkedList<Value>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct List(pub ListPia);
 
 /*
@@ -51,12 +51,18 @@ impl std::fmt::Display for List {
 }
 //  */
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Eq)]
 pub struct Symbol {
 	pub id: String,
 	pub line: usize,
 	pub colum: usize,
 	pub pos: usize,
+}
+
+impl PartialEq for Symbol {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
 }
 
 impl Display for Symbol {
