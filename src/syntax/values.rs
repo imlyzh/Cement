@@ -1,5 +1,5 @@
 use pest::iterators::Pair;
-use std::{collections::LinkedList, fmt::Display};
+use std::{collections::LinkedList, fmt::Display, sync::Arc};
 
 
 #[derive(Debug, Clone, PartialEq)]
@@ -10,10 +10,10 @@ pub enum Value {
 	Int(i64),
 	Uint(u64),
 	Float(f64),
-	Str(String),
-	Sym(Symbol),
-	List(List),
-	Vec(Vec<Value>),
+	Str(Arc<String>),
+	Sym(Arc<Symbol>),
+	List(Arc<List>),
+	Vec(Arc<Vec<Value>>),
 }
 
 /*

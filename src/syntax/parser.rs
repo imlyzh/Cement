@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::*;
@@ -13,9 +15,9 @@ pub struct Cement {}
 impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {
         match pair.as_rule() {
-			Rule::list => 		Value::List(List::parse_from(pair)),
-			Rule::symbol => 	Value::Sym(Symbol::parse_from(pair)),
-            Rule::string_lit => Value::Str(escape_str(pair.as_str())),
+			Rule::list => 		Value::List(Arc::new(List::parse_from(pair))),
+			Rule::symbol => 	Value::Sym(Arc::new(Symbol::parse_from(pair))),
+            Rule::string_lit => Value::Str(Arc::new(escape_str(pair.as_str()))),
             Rule::uint_lit => 	Value::Uint(pair.as_str().parse().unwrap()),
 			Rule::int_lit => 	Value::Int(pair.as_str().parse().unwrap()),
 			Rule::float_lit => 	Value::Float(pair.as_str().parse().unwrap()),
