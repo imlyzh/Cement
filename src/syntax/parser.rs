@@ -1,61 +1,58 @@
-use std::str::FromStr;
-
 use pest::iterators::{Pair, Pairs};
 use pest_derive::*;
 
 use super::values::*;
-use crate::syntax::utils::{escape_str, register_intern_str, str2char};
+use crate::syntax::utils::{escape_str, str2char};
 use pest::error::Error;
 
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
 pub struct Cement {}
 
-impl ParseFrom<Rule> for SExpr {
-    fn parse(pair: Pair<Rule>) -> Self {
-        let rs_expr = match pair.as_rule() {
-            Rule::list => RSExpr::NonAtomic(List::parse(pair.clone())),
-            Rule::atomic => RSExpr::Atomic(Atom::parse(pair.clone())),
-            _ => unreachable!(),
-        };
-        // let pos = Pos {
-            // start: pair.as_span().start(),
-            // end: pair.as_span().end(),
-        // };
-        SExpr(rs_expr)
-    }
-}
-
-impl ParseFrom<Rule> for List {
-    fn parse(pair: Pair<Rule>) -> Self {
-        let lst: ListPia = pair
-            .into_inner()
-            .flat_map(|x| x.into_inner())
-            .map(SExpr::parse)
-            .collect();
-        List(lst)
-    }
-}
-
-impl ParseFrom<Rule> for Atom {
-    fn parse(pair: Pair<Rule>) -> Self {
-        let pair = pair.into_inner().next().unwrap();
+impl ParseFrom<Rule> for Value {
+    fn parse_from(pair: Pair<Rule>) -> Self {
         match pair.as_rule() {
-            Rule::symbol => Atom::Sym(register_intern_str(pair.as_str())),
-            Rule::string_lit => Atom::Str(escape_str(pair.as_str())),
-            Rule::bool_lit => Atom::Bool(pair.as_str().parse().unwrap()),
-            Rule::char_lit => Atom::Char(str2char(&escape_str(pair.as_str()))),
-            Rule::uint_lit => Atom::Float(pair.as_str().parse().unwrap()),
-            Rule::int_lit => Atom::Float(pair.as_str().parse().unwrap()),
-            Rule::float_lit => Atom::Float(pair.as_str().parse().unwrap()),
+			Rule::list => 		Value::List(List::parse_from(pair)),
+			Rule::symbol => 	Value::Sym(Symbol::parse_from(pair)),
+            Rule::string_lit => Value::Str(escape_str(pair.as_str())),
+            Rule::uint_lit => 	Value::Uint(pair.as_str().parse().unwrap()),
+			Rule::int_lit => 	Value::Int(pair.as_str().parse().unwrap()),
+			Rule::float_lit => 	Value::Float(pair.as_str().parse().unwrap()),
+			Rule::bool_lit => 	Value::Bool(pair.as_str().parse().unwrap()),
+			Rule::char_lit => 	Value::Char(str2char(&escape_str(pair.as_str()))),
+			Rule::nil_lit =>	Value::Nil,
             _ => unreachable!(),
         }
     }
 }
 
-pub fn parse_unit(pair: Pair<Rule>) -> Option<SExpr> {
+impl ParseFrom<Rule> for List {
+    fn parse_from(pair: Pair<Rule>) -> Self {
+        let lst: ListPia = pair
+            .into_inner()
+            .flat_map(|x| x.into_inner())
+            .map(Value::parse_from)
+            .collect();
+        List(lst)
+    }
+}
+
+impl ParseFrom<Rule> for Symbol {
+    fn parse_from(pair: Pair<Rule>) -> Self {
+        let (line, colum) = pair.as_span().start_pos().line_col();
+        let pos = pair.as_span().start_pos().pos();
+        Symbol {
+            id: pair.as_str().to_string(),
+            line,
+            colum,
+            pos,
+        }
+    }
+}
+
+pub fn parse_unit(pair: Pair<Rule>) -> Option<Value> {
     match pair.as_rule() {
-        Rule::sexpr => Some(SExpr::parse(pair.clone().into_inner().next().unwrap())),
+        Rule::sexpr => Some(Value::parse_from(pair.clone().into_inner().next().unwrap())),
         Rule::EOI => None,
         _ => unreachable!(),
     }

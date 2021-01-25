@@ -1,24 +1,17 @@
-use std::collections::HashMap;
-use crate::syntax::values::SExpr;
+use crate::syntax::values::Value;
 
 
 #[derive(Debug)]
 pub struct RuntimeError ();
 
 #[derive(Debug)]
-pub struct CResult (pub Result<SExpr, RuntimeError>);
+pub struct CResult (pub Result<Value, RuntimeError>);
 
 #[derive(Debug)]
-pub struct ReplEnv (pub HashMap<String, SExpr>);
+pub struct ThreadContext {
 
-impl ReplEnv {
-    pub fn new() -> Self {
-        ReplEnv(HashMap::new())
-    }
 }
 
-/*
-lazy_static! {
-    static ref REPL_ENV: ReplEnv = ReplEnv::new();
+impl ThreadContext {
+	pub fn new() {}
 }
-*/

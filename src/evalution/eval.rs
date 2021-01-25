@@ -1,6 +1,7 @@
-use super::context::{CResult, ReplEnv};
-use crate::syntax::values::SExpr;
+use super::context::{CResult, ThreadContext};
+use crate::syntax::values::Value;
 
-pub fn eval(env: &mut ReplEnv, ast: &SExpr) -> CResult {
+
+pub fn eval(env: &mut ThreadContext, ast: &Value) -> CResult {
     todo!()
 }

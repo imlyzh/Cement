@@ -45,8 +45,3 @@ pub fn str2char(i: &str) -> char {
     i.chars().nth(0).unwrap()
 }
 
-#[inline]
-pub fn register_intern_str(i: &str) -> String {
-    // FIXME
-    i.to_string()
-}
