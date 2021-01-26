@@ -20,12 +20,12 @@ fn main() -> ! {
 		let mut a = String::new();
 		stdin().read_line(&mut a).unwrap();
 		// parse
-		let temp = repl_parse("(a b)").unwrap();
+		let temp = repl_parse("((quote module) name body ...)").unwrap();
 		let res = repl_parse(&a).unwrap();
 		let mut mr =  MatchRecord::default();
 		match_template(&mut mr, &temp, &res).unwrap();
 		println!("> {:?}", res);
-		println!("out: {:?}", mr);
+		println!("match: {:?}", mr);
 		// println!("> {}", res.map_or("error.".to_string(), |v| v.to_string()));
 	}
 }
