@@ -19,6 +19,32 @@ pub enum Value {
 	Function(Arc<FunctionDef>),
 }
 
+macro_rules! impl_get_item {
+	($name:ident, $item:ident, $tp:path) => {
+		pub fn $name(&self) -> Option<$tp> {
+			if let Value::$item(x) = self {
+				Some(x.clone())
+			} else {
+				None
+			}
+		}
+	};
+}
+
+
+impl Value {
+	impl_get_item!(get_bool, Bool, bool);
+	impl_get_item!(get_char, Char, char);
+	impl_get_item!(get_int, Int, i64);
+	impl_get_item!(get_uint, Uint, u64);
+	impl_get_item!(get_float, Float, f64);
+	impl_get_item!(get_str, Str, Arc<String>);
+	impl_get_item!(get_sym, Sym, Arc<Symbol>);
+	impl_get_item!(get_list, List, Arc<List>);
+	impl_get_item!(get_vec, Vec, Arc<Vec<Value>>);
+	impl_get_item!(get_fun, Function, Arc<FunctionDef>);
+}
+
 /*
 impl std::fmt::Display for Value {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

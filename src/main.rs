@@ -3,6 +3,7 @@ mod context;
 mod syntax;
 mod evalution;
 mod preprocess;
+mod error;
 
 use std::{io::{stdin, stdout, Write}};
 // use evalution::context::ThreadContext;

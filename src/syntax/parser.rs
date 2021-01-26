@@ -2,15 +2,17 @@ use std::{cell::RefCell, collections::LinkedList, sync::Arc};
 
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
+use pest::error::Error;
 use pest_derive::*;
 
 use crate::values::*;
 use crate::syntax::utils::{escape_str, str2char};
-use pest::error::Error;
 
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
 pub struct Cement {}
+
+pub type ParseError = Error<Rule>;
 
 impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {
@@ -63,21 +65,15 @@ pub fn parse_unit(pair: Pair<Rule>) -> Option<Value> {
     }
 }
 
-pub type ParseError = Error<Rule>;
-
-#[derive(Debug)]
-pub struct CompilerError(pub ParseError);
-
-pub fn parse(input: &str) -> Result<ListPia, CompilerError> {
-    let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input).map_err(|e| CompilerError(e))?;
+pub fn parse(input: &str) -> Result<ListPia, ParseError> {
+    let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input)?;
 	let result =
 		pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
     Ok(result.collect())
 }
 
-pub fn repl_parse(input: &str) -> Result<Value, CompilerError> {
-	let pair = Cement::parse(Rule::repl_unit, input)
-		.map_err(|e| CompilerError(e))?
+pub fn repl_parse(input: &str) -> Result<Value, ParseError> {
+	let pair = Cement::parse(Rule::repl_unit, input)?
 		.next().unwrap().into_inner()
 		.next().unwrap().into_inner()
 		.next().unwrap();

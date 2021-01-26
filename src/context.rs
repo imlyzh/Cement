@@ -39,32 +39,40 @@ impl Display for FunctionDef {
 
 #[derive(Debug)]
 pub struct Module {
-	logic_path: Arc<Symbol>,
+	name: Arc<Symbol>,
 	parent: Option<Arc<Module>>,
+	module_table: Mutex<HashMap<Arc<Symbol>, Arc<Module>>>,
 	macro_table: Mutex<HashMap<Arc<Symbol>, Arc<MacroDef>>>,
 	function_table: Mutex<HashMap<Arc<Symbol>, Arc<FunctionDef>>>,
 }
 
+impl Module {
+	pub fn new(name: Arc<Symbol>, parent: Option<Arc<Module>>) -> Self {
+		Module {
+		    name,
+		    parent,
+		    module_table: Mutex::new(HashMap::new()),
+            macro_table: Mutex::new(HashMap::new()),
+            function_table: Mutex::new(HashMap::new()),
+		}
+	}
+}
+
+impl Default for Module {
+    fn default() -> Self {
+		Self::new(Arc::new(Symbol::new("anonymous-module")), None)
+    }
+}
+
 impl PartialEq for Module {
     fn eq(&self, other: &Self) -> bool {
-        self.logic_path == other.logic_path
+        self.name == other.name
     }
 }
 
 impl Display for Module {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#<function {}>", self.logic_path.to_string())
-    }
-}
-
-impl Default for Module {
-    fn default() -> Self {
-        Module {
-			logic_path: Arc::new(Symbol::new("anonymous-module")),
-			parent: None,
-            macro_table: Mutex::new(HashMap::new()),
-            function_table: Mutex::new(HashMap::new()),
-		}
+        write!(f, "#<function {}>", self.name.to_string())
     }
 }
 

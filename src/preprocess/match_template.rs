@@ -6,15 +6,8 @@ use std::{
 
 use multimap::MultiMap;
 
-use crate::values::*;
+use crate::{error::SyntaxMatchError, values::*};
 
-#[derive(Debug)]
-pub enum SyntaxMatchError {
-    MatchError,
-    MatchListSizeError,
-    ExtendInMiddleError,
-    RepeatedSymbol(Arc<Symbol>),
-}
 
 #[derive(Debug, Default)]
 pub struct MatchRecord {
