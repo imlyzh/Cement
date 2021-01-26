@@ -1,5 +1,5 @@
 use pest::iterators::Pair;
-use std::{cell::RefCell, collections::LinkedList, convert::identity, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc};
+use std::{cell::RefCell, collections::LinkedList, fmt::Display, hash::Hash, sync::Arc};
 
 use crate::context::FunctionDef;
 

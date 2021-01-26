@@ -4,7 +4,7 @@ mod syntax;
 mod evalution;
 mod preprocess;
 
-use std::{default, io::{stdin, stdout, Write}};
+use std::{io::{stdin, stdout, Write}};
 // use evalution::context::ThreadContext;
 
 

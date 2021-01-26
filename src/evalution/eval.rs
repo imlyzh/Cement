@@ -2,6 +2,6 @@ use crate::context::{CResult, ThreadContext};
 use crate::values::Value;
 
 
-pub fn eval(env: &mut ThreadContext, ast: &Value) -> CResult {
+pub fn _eval(_env: &mut ThreadContext, _ast: &Value) -> CResult {
     todo!()
 }
