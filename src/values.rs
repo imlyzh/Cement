@@ -90,6 +90,9 @@ pub struct Symbol {
 	// pub value: RefCell<Option<Value>>,
 }
 
+unsafe impl Sync for Symbol {}
+unsafe impl Send for Symbol {}
+
 impl Symbol {
 	pub fn new(i: &str) -> Self {
 		Symbol {

@@ -1,5 +1,7 @@
 use std::{cell::RefCell, collections::{HashMap, LinkedList}, fmt::Display, sync::{Arc, Mutex}};
 
+use lazy_static::lazy_static;
+
 use crate::values::{Symbol, Value};
 
 
@@ -56,6 +58,11 @@ impl Module {
             function_table: Mutex::new(HashMap::new()),
 		}
 	}
+}
+
+lazy_static!{
+	pub static ref ANONYMOUS_MODULE_NAME: Arc<Symbol> =
+		Arc::new(Symbol::new("anonymous-module"));
 }
 
 impl Default for Module {

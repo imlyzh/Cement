@@ -1,12 +1,19 @@
-use std::sync::{Arc};
+use std::sync::Arc;
 
-use crate::{error::SyntaxMatchError, syntax::parser::repl_parse};
+use lazy_static::lazy_static;
 
-use crate::{context::Module, values::*};
+use crate::error::SyntaxMatchError;
+use crate::syntax::parser::repl_parse;
+use crate::context::{Module, ANONYMOUS_MODULE_NAME};
+use crate::values::*;
 
 use super::match_template::*;
 
 
+lazy_static!{
+	static ref MODULE_MATCH_TEMP: Value =
+	repl_parse("((quote module) name body ...)").unwrap();
+}
 
 impl Module {
 	pub fn loading(parent: Option<Arc<Module>>, i: ListPia) -> Result<Self, SyntaxMatchError> {
@@ -14,7 +21,7 @@ impl Module {
 			let mut ctx = MatchRecord::default();
 			match_template(
 				&mut ctx,
-				&repl_parse("((quote module) name body ...)").unwrap(),
+				&MODULE_MATCH_TEMP,
 				i.front().unwrap())?;
 			
 			let name = ctx.maps.borrow()
@@ -26,7 +33,7 @@ impl Module {
 			let m = Module::new(name, parent);
 			todo!()
 		} else {
-			let r = Module::new(Arc::new(Symbol::new("anonymous-module")), parent);
+			let r = Module::new(ANONYMOUS_MODULE_NAME.clone(), parent);
 			todo!()
 		}
 	}
