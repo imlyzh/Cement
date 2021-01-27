@@ -8,7 +8,6 @@ use multimap::MultiMap;
 
 use crate::{error::SyntaxMatchError, values::*};
 
-
 #[derive(Debug, Default)]
 pub struct MatchRecord {
     pub maps: RefCell<HashMap<Arc<Symbol>, Value>>,
@@ -25,7 +24,7 @@ pub fn match_template(
             record
                 .maps
                 .get_mut()
-				.insert(id.clone(), v)
+                .insert(id.clone(), v)
                 .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(id)))?;
         }
 
@@ -34,7 +33,7 @@ pub fn match_template(
                 && !b.0.is_empty()
                 && *a.clone().0.back().unwrap() == Value::Sym(Arc::new(Symbol::new("...")))
             {
-                if a.clone().0.len() - 1 > b.0.len() {
+                if a.clone().0.len() - 2 > b.0.len() {
                     return Err(SyntaxMatchError::MatchListSizeError);
                 }
                 let mut a_lst = a.0.clone();
@@ -43,7 +42,7 @@ pub fn match_template(
 
                 a_lst.iter().try_for_each(|x| {
                     if *x == Value::Sym(Arc::new(Symbol::new("..."))) {
-                        Err(SyntaxMatchError::ExtendInMiddleError)
+                        Err(SyntaxMatchError::ExtendInMiddleError(x.get_sym().unwrap()))
                     } else {
                         Ok(())
                     }
@@ -53,7 +52,8 @@ pub fn match_template(
                 let b_expand_lst = b_lst[a_lst.len()..b_lst.len()].iter();
                 let b_lst = b_lst[0..a_lst.len()].iter();
 
-                a_lst.iter()
+                a_lst
+                    .iter()
                     .zip(b_lst)
                     .try_for_each(|(a, b)| match_template(record, a, b))?;
 
@@ -81,27 +81,47 @@ pub fn match_template(
                     record.extend_maps.get_mut().insert(k, v);
                 }
             } else {
-				if a.0.len() != b.0.len() {
+                if a.0.len() != b.0.len() {
                     return Err(SyntaxMatchError::MatchListSizeError);
                 }
-				a.as_ref()
-                .0
-                .iter()
-                .zip(b.as_ref().0.iter())
-                .try_for_each(|(x, y)| match_template(record, x, y))?;
-			}
-        }
-        (Value::List(a), Value::Sym(b)) => {
-            if a.0.len() == 2 {
-                if let Value::Sym(k) = a.0.front().unwrap() {
-                    if k.id == "quote" {
-                        if *a.0.back().unwrap() == Value::Sym(b) {
-                            return Ok(());
-                        }
-                    }
-                }
+                a.as_ref()
+                    .0
+                    .iter()
+                    .zip(b.as_ref().0.iter())
+                    .try_for_each(|(x, y)| match_template(record, x, y))?;
             }
-            return Err(SyntaxMatchError::MatchError);
+        }
+        (Value::List(a), b) => {
+            let name = a.0.back().unwrap().clone();
+            if !(a.0.len() == 2 && name.get_sym().is_some()) {
+                return Err(SyntaxMatchError::MatchError);
+            }
+            if !(a.0.front().unwrap().get_sym().is_some()) {
+                return Err(SyntaxMatchError::MatchError);
+            }
+            let tp = a.0.front().unwrap().get_sym().unwrap();
+            let tpid = &*tp.id;
+            if tpid == "quote" && name == b {
+                return Ok(());
+            }
+            if !(tpid == "$sym" && b.get_sym().is_some()
+                || tpid == "$str" && b.get_str().is_some()
+                || tpid == "$int" && b.get_int().is_some()
+                || tpid == "$uint" && b.get_uint().is_some()
+                || tpid == "$bool" && b.get_bool().is_some()
+                || tpid == "$char" && b.get_char().is_some()
+                || tpid == "$list" && b.get_list().is_some()
+                || tpid == "$float" && b.get_float().is_some()
+                || tpid == "$any")
+            {
+                return Err(SyntaxMatchError::SExprTypeCheckError(tp.clone()));
+			}
+			let name = name.get_sym().unwrap();
+            record
+                .maps
+                .get_mut()
+                .insert(name.clone(), b)
+                .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(name.clone())))?;
         }
         _ => {
             if temp != inp {

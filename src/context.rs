@@ -1,35 +1,38 @@
-use std::{cell::RefCell, collections::{HashMap, LinkedList}, fmt::Display, sync::{Arc, Mutex}};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, LinkedList},
+    fmt::Display,
+    sync::{Arc, Mutex},
+};
 
 use lazy_static::lazy_static;
 
 use crate::values::{Symbol, Value};
 
+#[derive(Debug)]
+pub struct RuntimeError();
 
 #[derive(Debug)]
-pub struct RuntimeError ();
-
-#[derive(Debug)]
-pub struct CResult (pub Result<Value, RuntimeError>);
+pub struct CResult(pub Result<Value, RuntimeError>);
 
 #[derive(Debug, PartialEq)]
 pub struct MacroDef {
-	name: Arc<Symbol>,
-	body: Value,
+    name: Arc<Symbol>,
+    body: Value,
 }
 
 #[derive(Debug)]
 pub struct FunctionDef {
-	id: Arc<Symbol>,
-	from_module: Arc<Module>,
-	parent: Arc<FunctionDef>,
-	params: Vec<Arc<Symbol>>,
-	body: Vec<Value>,
+    id: Arc<Symbol>,
+    from_module: Arc<Module>,
+    parent: Arc<FunctionDef>,
+    params: Vec<Arc<Symbol>>,
+    body: Vec<Value>,
 }
 
 impl PartialEq for FunctionDef {
     fn eq(&self, other: &Self) -> bool {
-		self.id == other.id &&
-		self.from_module == other.from_module
+        self.id == other.id && self.from_module == other.from_module
     }
 }
 
@@ -41,33 +44,32 @@ impl Display for FunctionDef {
 
 #[derive(Debug)]
 pub struct Module {
-	name: Arc<Symbol>,
-	parent: Option<Arc<Module>>,
-	module_table: Mutex<HashMap<Arc<Symbol>, Arc<Module>>>,
-	macro_table: Mutex<HashMap<Arc<Symbol>, Arc<MacroDef>>>,
-	function_table: Mutex<HashMap<Arc<Symbol>, Arc<FunctionDef>>>,
+    name: Arc<Symbol>,
+    parent: Option<Arc<Module>>,
+    module_table: Mutex<HashMap<Arc<Symbol>, Arc<Module>>>,
+    macro_table: Mutex<HashMap<Arc<Symbol>, Arc<MacroDef>>>,
+    function_table: Mutex<HashMap<Arc<Symbol>, Arc<FunctionDef>>>,
 }
 
 impl Module {
-	pub fn new(name: Arc<Symbol>, parent: Option<Arc<Module>>) -> Self {
-		Module {
-		    name,
-		    parent,
-		    module_table: Mutex::new(HashMap::new()),
+    pub fn new(name: Arc<Symbol>, parent: Option<Arc<Module>>) -> Self {
+        Module {
+            name,
+            parent,
+            module_table: Mutex::new(HashMap::new()),
             macro_table: Mutex::new(HashMap::new()),
             function_table: Mutex::new(HashMap::new()),
-		}
-	}
+        }
+    }
 }
 
-lazy_static!{
-	pub static ref ANONYMOUS_MODULE_NAME: Arc<Symbol> =
-		Arc::new(Symbol::new("anonymous-module"));
+lazy_static! {
+    pub static ref ANONYMOUS_MODULE_NAME: Arc<Symbol> = Arc::new(Symbol::new("anonymous-module"));
 }
 
 impl Default for Module {
     fn default() -> Self {
-		Self::new(Arc::new(Symbol::new("anonymous-module")), None)
+        Self::new(Arc::new(Symbol::new("anonymous-module")), None)
     }
 }
 
@@ -83,21 +85,19 @@ impl Display for Module {
     }
 }
 
-
 #[derive(Debug, Default)]
 pub struct EnvContext {
-	pub module_table: HashMap<Arc<Symbol>, Arc<Module>>,
+    pub module_table: HashMap<Arc<Symbol>, Arc<Module>>,
 }
 
 #[derive(Debug, Default)]
 pub struct ThreadContext {
-	pub env_context: Arc<EnvContext>,
-	pub frame_stack: RefCell<LinkedList<FunctionContext>>,
+    pub env_context: Arc<EnvContext>,
+    pub frame_stack: RefCell<LinkedList<FunctionContext>>,
 }
-
 
 #[derive(Debug)]
 pub struct FunctionContext {
-	pub namespace: HashMap<Arc<Symbol>, Value>,
-	pub funcinfo: Arc<FunctionDef>,
+    pub namespace: HashMap<Arc<Symbol>, Value>,
+    pub funcinfo: Arc<FunctionDef>,
 }

@@ -1,12 +1,12 @@
 use std::{cell::RefCell, collections::LinkedList, sync::Arc};
 
+use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
-use pest::error::Error;
 use pest_derive::*;
 
-use crate::values::*;
-use crate::syntax::utils::{escape_str, str2char};
+use crate::utils::{escape_str, str2char};
+use crate::{utils::string_intern, values::*};
 
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
@@ -17,15 +17,15 @@ pub type ParseError = Error<Rule>;
 impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {
         match pair.as_rule() {
-			Rule::list => 		Value::List(Arc::new(List::parse_from(pair))),
-			Rule::symbol => 	Value::Sym(Arc::new(Symbol::parse_from(pair))),
+            Rule::list => Value::List(Arc::new(List::parse_from(pair))),
+            Rule::symbol => Value::Sym(Arc::new(Symbol::parse_from(pair))),
             Rule::string_lit => Value::Str(Arc::new(escape_str(pair.as_str()))),
-            Rule::uint_lit => 	Value::Uint(pair.as_str().parse().unwrap()),
-			Rule::int_lit => 	Value::Int(pair.as_str().parse().unwrap()),
-			Rule::float_lit => 	Value::Float(pair.as_str().parse().unwrap()),
-			Rule::bool_lit => 	Value::Bool(pair.as_str().parse().unwrap()),
-			Rule::char_lit => 	Value::Char(str2char(&escape_str(pair.as_str()))),
-			Rule::nil_lit =>	Value::Nil,
+            Rule::uint_lit => Value::Uint(pair.as_str().parse().unwrap()),
+            Rule::int_lit => Value::Int(pair.as_str().parse().unwrap()),
+            Rule::float_lit => Value::Float(pair.as_str().parse().unwrap()),
+            Rule::bool_lit => Value::Bool(pair.as_str().parse().unwrap()),
+            Rule::char_lit => Value::Char(str2char(&escape_str(pair.as_str()))),
+            Rule::nil_lit => Value::Nil,
             _ => unreachable!(),
         }
     }
@@ -47,12 +47,12 @@ impl ParseFrom<Rule> for Symbol {
         let (line, colum) = pair.as_span().start_pos().line_col();
         let pos = pair.as_span().start_pos().pos();
         Symbol {
-            id: pair.as_str().to_string(),
+            id: string_intern(pair.as_str()),
             line,
             colum,
-			pos,
-			scope: RefCell::new(LinkedList::new()),
-		    // value: RefCell::new(None)
+            pos,
+            scope: RefCell::new(LinkedList::new()),
+            // value: RefCell::new(None)
         }
     }
 }
@@ -67,15 +67,19 @@ pub fn parse_unit(pair: Pair<Rule>) -> Option<Value> {
 
 pub fn parse(input: &str) -> Result<ListPia, ParseError> {
     let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input)?;
-	let result =
-		pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
+    let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
     Ok(result.collect())
 }
 
 pub fn repl_parse(input: &str) -> Result<Value, ParseError> {
-	let pair = Cement::parse(Rule::repl_unit, input)?
-		.next().unwrap().into_inner()
-		.next().unwrap().into_inner()
-		.next().unwrap();
+    let pair = Cement::parse(Rule::repl_unit, input)?
+        .next()
+        .unwrap()
+        .into_inner()
+        .next()
+        .unwrap()
+        .into_inner()
+        .next()
+        .unwrap();
     Ok(Value::parse_from(pair))
 }

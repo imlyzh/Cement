@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use std::iter::FromIterator;
+use std::{collections::VecDeque, sync::Arc};
 
 #[inline]
 pub fn escape_char(i: char) -> char {
@@ -45,3 +45,7 @@ pub fn str2char(i: &str) -> char {
     i.chars().nth(0).unwrap()
 }
 
+#[inline]
+pub fn string_intern(i: &str) -> Arc<String> {
+    Arc::new(String::from(i))
+}
