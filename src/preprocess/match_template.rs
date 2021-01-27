@@ -2,7 +2,9 @@ use std::{cell::RefCell, collections::HashMap, sync::Arc};
 
 use multimap::MultiMap;
 
-use crate::{error::SyntaxMatchError, values::*};
+use super::symbols::*;
+use crate::error::SyntaxMatchError;
+use crate::values::*;
 
 #[derive(Debug, Default)]
 pub struct MatchRecord {
@@ -29,7 +31,7 @@ pub fn match_template(
             let b_lst: Vec<Value> = b.iter().collect();
             if !(!a_lst.is_empty()
                 && !b_lst.is_empty()
-                && a_lst.last().unwrap().clone() == Value::Sym(Arc::new(Symbol::new("..."))))
+                && a_lst.last().unwrap().clone() == EXTEND_SYM.clone())
             {
                 if a.len() != b.len() {
                     return Err(SyntaxMatchError::MatchListSizeError);
@@ -49,7 +51,7 @@ pub fn match_template(
 
             println!("a_lst len: {}", a_lst.len());
             a_lst.try_for_each(|x| {
-                if *x == Value::Sym(Arc::new(Symbol::new("..."))) {
+                if *x == EXTEND_SYM.clone() {
                     Err(SyntaxMatchError::ExtendInMiddleError(x.get_sym().unwrap()))
                 } else {
                     Ok(())

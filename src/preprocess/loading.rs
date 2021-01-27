@@ -1,18 +1,11 @@
 use std::sync::Arc;
 
-use lazy_static::lazy_static;
-
-use crate::context::*;
+use super::symbols::*;
 use crate::error::SyntaxMatchError;
-use crate::syntax::parser::repl_parse;
 use crate::values::*;
+use crate::{context::*, syntax};
 
 use super::match_template::*;
-
-lazy_static! {
-    static ref MODULE_MATCH_TEMP: Value =
-        repl_parse("((quote module) ($sym name) body ...)").unwrap();
-}
 
 impl FunctionDef {
     pub fn loading(parent: Option<Arc<Self>>, i: &Value) -> Result<Self, SyntaxMatchError> {
