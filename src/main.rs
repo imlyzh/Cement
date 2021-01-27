@@ -1,17 +1,16 @@
-mod context;
-mod error;
-mod evalution;
-mod preprocess;
-mod syntax;
-mod utils;
-mod values;
+pub mod utils;
+pub mod error;
+pub mod values;
+pub mod syntax;
+pub mod context;
+pub mod evalution;
+pub mod preprocess;
 
 use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
 use preprocess::match_template::*;
-
-use crate::syntax::parser::*;
+use syntax::parser::*;
 
 fn main() -> ! {
     loop {
