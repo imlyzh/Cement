@@ -9,6 +9,16 @@ use lazy_static::lazy_static;
 
 use crate::values::{Symbol, Value};
 
+macro_rules! impl_partial_eq {
+    ($tp:path) => {
+        impl PartialEq for $tp {
+            fn eq(&self, other: &Self) -> bool {
+                self.name == other.name && self.from_module == other.from_module
+            }
+        }
+    };
+}
+
 #[derive(Debug)]
 pub struct RuntimeError();
 
@@ -21,6 +31,24 @@ pub struct MacroDef {
     body: Value,
 }
 
+#[derive(Debug)]
+pub struct TempMacro {
+    name: Arc<Symbol>,
+    from_module: Arc<Module>,
+    pairs: Vec<(Value, Value)>,
+}
+
+impl_partial_eq!(TempMacro);
+
+#[derive(Debug)]
+pub struct ProcessMacro {
+    name: Arc<Symbol>,
+    from_module: Arc<Module>,
+    body: Arc<FunctionDef>,
+}
+
+impl_partial_eq!(ProcessMacro);
+
 #[derive(Debug, PartialEq)]
 pub enum FunctionDef {
     UserFunction(UserFunctionDef),
@@ -29,18 +57,14 @@ pub enum FunctionDef {
 
 #[derive(Debug)]
 pub struct UserFunctionDef {
-    id: Arc<Symbol>,
+    name: Arc<Symbol>,
     from_module: Arc<Module>,
     parent: Arc<FunctionDef>,
     params: Vec<Arc<Symbol>>,
     body: Vec<Value>,
 }
 
-impl PartialEq for UserFunctionDef {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.from_module == other.from_module
-    }
-}
+impl_partial_eq!(UserFunctionDef);
 
 impl Display for UserFunctionDef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -48,14 +72,14 @@ impl Display for UserFunctionDef {
             f,
             "#<function {:?}.{}>",
             todo!("module name"),
-            self.id.to_string()
+            self.name.to_string()
         )
     }
 }
 
 #[derive(Debug)]
 pub struct NativeFunctionDef {
-    id: Arc<Symbol>,
+    name: Arc<Symbol>,
     from_module: Arc<Module>,
     parent: Arc<FunctionDef>,
     params: Option<Vec<Arc<Symbol>>>,
@@ -63,11 +87,7 @@ pub struct NativeFunctionDef {
     body: extern "C" fn(Vec<Value>) -> CResult,
 }
 
-impl PartialEq for NativeFunctionDef {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id && self.from_module == other.from_module
-    }
-}
+impl_partial_eq!(NativeFunctionDef);
 
 impl Display for NativeFunctionDef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -75,7 +95,7 @@ impl Display for NativeFunctionDef {
             f,
             "#<function {:?}.{}>",
             todo!("module name"),
-            self.id.to_string()
+            self.name.to_string()
         )
     }
 }
@@ -113,7 +133,7 @@ impl Default for Module {
 
 impl PartialEq for Module {
     fn eq(&self, other: &Self) -> bool {
-        self.name == other.name
+        self.name == other.name && self.parent == other.parent
     }
 }
 
