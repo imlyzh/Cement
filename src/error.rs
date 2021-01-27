@@ -8,8 +8,8 @@ pub enum SyntaxMatchError {
     MatchError,
     MatchListSizeError,
     ExtendInMiddleError(Arc<Symbol>),
-	RepeatedSymbol(Arc<Symbol>),
-	SExprTypeCheckError(Arc<Symbol>),
+    RepeatedSymbol(Arc<Symbol>),
+    SExprTypeCheckError(Arc<Symbol>),
 }
 
 #[derive(Debug)]

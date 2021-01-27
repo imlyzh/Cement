@@ -111,17 +111,18 @@ pub fn match_template(
                 || tpid == "$bool" && b.get_bool().is_some()
                 || tpid == "$char" && b.get_char().is_some()
                 || tpid == "$list" && b.get_list().is_some()
-                || tpid == "$float" && b.get_float().is_some()
-                || tpid == "$any")
+                || tpid == "$float" && b.get_float().is_some())
             {
                 return Err(SyntaxMatchError::SExprTypeCheckError(tp.clone()));
-			}
-			let name = name.get_sym().unwrap();
+            }
+            let name = name.get_sym().unwrap();
             record
                 .maps
                 .get_mut()
                 .insert(name.clone(), b)
-                .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(name.clone())))?;
+                .map_or(Ok(()), |_| {
+                    Err(SyntaxMatchError::RepeatedSymbol(name.clone()))
+                })?;
         }
         _ => {
             if temp != inp {

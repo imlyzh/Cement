@@ -10,7 +10,8 @@ use crate::values::*;
 use super::match_template::*;
 
 lazy_static! {
-    static ref MODULE_MATCH_TEMP: Value = repl_parse("((quote module) ($sym name) body ...)").unwrap();
+    static ref MODULE_MATCH_TEMP: Value =
+        repl_parse("((quote module) ($sym name) body ...)").unwrap();
 }
 
 impl FunctionDef {

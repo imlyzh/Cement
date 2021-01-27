@@ -23,13 +23,13 @@ pub struct MacroDef {
 
 #[derive(Debug, PartialEq)]
 pub enum FunctionDef {
-	UserFunction(UserFunctionDef),
-	NativeFunction(NativeFunctionDef),
+    UserFunction(UserFunctionDef),
+    NativeFunction(NativeFunctionDef),
 }
 
 #[derive(Debug)]
 pub struct UserFunctionDef {
-	id: Arc<Symbol>,
+    id: Arc<Symbol>,
     from_module: Arc<Module>,
     parent: Arc<FunctionDef>,
     params: Vec<Arc<Symbol>>,
@@ -44,18 +44,23 @@ impl PartialEq for UserFunctionDef {
 
 impl Display for UserFunctionDef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#<function {:?}.{}>", todo!("module name"), self.id.to_string())
+        write!(
+            f,
+            "#<function {:?}.{}>",
+            todo!("module name"),
+            self.id.to_string()
+        )
     }
 }
 
 #[derive(Debug)]
 pub struct NativeFunctionDef {
-	id: Arc<Symbol>,
-	from_module: Arc<Module>,
-	parent: Arc<FunctionDef>,
-	params: Option<Vec<Arc<Symbol>>>,
-	is_pure: bool,
-	body: extern "C" fn(Vec<Value>) -> CResult,
+    id: Arc<Symbol>,
+    from_module: Arc<Module>,
+    parent: Arc<FunctionDef>,
+    params: Option<Vec<Arc<Symbol>>>,
+    is_pure: bool,
+    body: extern "C" fn(Vec<Value>) -> CResult,
 }
 
 impl PartialEq for NativeFunctionDef {
@@ -66,7 +71,12 @@ impl PartialEq for NativeFunctionDef {
 
 impl Display for NativeFunctionDef {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "#<function {:?}.{}>", todo!("module name"), self.id.to_string())
+        write!(
+            f,
+            "#<function {:?}.{}>",
+            todo!("module name"),
+            self.id.to_string()
+        )
     }
 }
 
