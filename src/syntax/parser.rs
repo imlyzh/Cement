@@ -17,7 +17,7 @@ pub type ParseError = Error<Rule>;
 impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {
         match pair.as_rule() {
-            Rule::list => Value::List(Arc::new(List::parse_from(pair))),
+            Rule::list => NodeExtend::parse_from(pair).into(),
             Rule::symbol => Value::Sym(Arc::new(Symbol::parse_from(pair))),
             Rule::string_lit => Value::Str(Arc::new(escape_str(pair.as_str()))),
             Rule::uint_lit => Value::Uint(pair.as_str().parse().unwrap()),
@@ -31,14 +31,12 @@ impl ParseFrom<Rule> for Value {
     }
 }
 
-impl ParseFrom<Rule> for List {
+impl ParseFrom<Rule> for NodeExtend {
     fn parse_from(pair: Pair<Rule>) -> Self {
-        let lst: ListPia = pair
-            .into_inner()
+        pair.into_inner()
             .flat_map(|x| x.into_inner())
             .map(Value::parse_from)
-            .collect();
-        List(lst)
+            .collect()
     }
 }
 
@@ -65,7 +63,7 @@ pub fn parse_unit(pair: Pair<Rule>) -> Option<Value> {
     }
 }
 
-pub fn parse(input: &str) -> Result<ListPia, ParseError> {
+pub fn parse(input: &str) -> Result<NodeExtend, ParseError> {
     let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input)?;
     let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
     Ok(result.collect())
