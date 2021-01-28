@@ -5,9 +5,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use lazy_static::lazy_static;
-
-use crate::values::{Symbol, Value};
+use crate::values::{Node, Symbol, Value};
+use crate::{preprocess::symbols::*, values::ListPia};
 
 macro_rules! impl_partial_eq {
     ($tp:path) => {
@@ -19,16 +18,45 @@ macro_rules! impl_partial_eq {
     };
 }
 
+macro_rules! impl_display {
+    ($tp:path) => {
+        impl Display for $tp {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                let mut path = self
+                    .logic_path()
+                    .iter()
+                    .map(|x| (*x.get_sym().unwrap().id).clone())
+                    .collect::<Vec<_>>();
+                path.reverse();
+                write!(f, "#<function {}>", path.join("."))
+            }
+        }
+    };
+}
+
 #[derive(Debug)]
 pub struct RuntimeError();
 
 #[derive(Debug)]
 pub struct CResult(pub Result<Value, RuntimeError>);
 
+pub trait LogicPath {
+    fn logic_path(&self) -> ListPia;
+}
+
 #[derive(Debug, PartialEq)]
-pub struct MacroDef {
-    name: Arc<Symbol>,
-    body: Value,
+pub enum MacroDef {
+    TempMacro(TempMacro),
+    ProcessMacro(ProcessMacro),
+}
+
+impl LogicPath for MacroDef {
+    fn logic_path(&self) -> ListPia {
+        match self {
+            MacroDef::TempMacro(x) => x.logic_path(),
+            MacroDef::ProcessMacro(x) => x.logic_path(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -39,6 +67,16 @@ pub struct TempMacro {
 }
 
 impl_partial_eq!(TempMacro);
+impl_display!(TempMacro);
+
+impl LogicPath for TempMacro {
+    fn logic_path(&self) -> ListPia {
+        Arc::new(Node(
+            Value::Sym(self.name.clone()),
+            Value::Pair(self.from_module.logic_path()),
+        ))
+    }
+}
 
 #[derive(Debug)]
 pub struct ProcessMacro {
@@ -48,6 +86,16 @@ pub struct ProcessMacro {
 }
 
 impl_partial_eq!(ProcessMacro);
+impl_display!(ProcessMacro);
+
+impl LogicPath for ProcessMacro {
+    fn logic_path(&self) -> ListPia {
+        Arc::new(Node(
+            Value::Sym(self.name.clone()),
+            Value::Pair(self.from_module.logic_path()),
+        ))
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub enum FunctionDef {
@@ -55,24 +103,40 @@ pub enum FunctionDef {
     NativeFunction(NativeFunctionDef),
 }
 
+impl LogicPath for FunctionDef {
+    fn logic_path(&self) -> ListPia {
+        match self {
+            FunctionDef::UserFunction(x) => x.logic_path(),
+            FunctionDef::NativeFunction(x) => x.logic_path(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct UserFunctionDef {
     name: Arc<Symbol>,
     from_module: Arc<Module>,
-    parent: Arc<FunctionDef>,
+    parent: Option<Arc<FunctionDef>>,
     params: Vec<Arc<Symbol>>,
     body: Vec<Value>,
 }
 
 impl_partial_eq!(UserFunctionDef);
+impl_display!(UserFunctionDef);
 
-impl Display for UserFunctionDef {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#<function {:?}.{}>",
-            todo!("module name"),
-            self.name.to_string()
+impl LogicPath for UserFunctionDef {
+    fn logic_path(&self) -> ListPia {
+        self.parent.clone().map_or(
+            Arc::new(Node(
+                Value::Sym(self.name.clone()),
+                Value::Pair(self.from_module.logic_path()),
+            )),
+            |x| {
+                Arc::new(Node(
+                    Value::Sym(self.name.clone()),
+                    Value::Pair(x.logic_path()),
+                ))
+            },
         )
     }
 }
@@ -81,22 +145,20 @@ impl Display for UserFunctionDef {
 pub struct NativeFunctionDef {
     name: Arc<Symbol>,
     from_module: Arc<Module>,
-    parent: Arc<FunctionDef>,
     params: Option<Vec<Arc<Symbol>>>,
     is_pure: bool,
     body: extern "C" fn(Vec<Value>) -> CResult,
 }
 
 impl_partial_eq!(NativeFunctionDef);
+impl_display!(NativeFunctionDef);
 
-impl Display for NativeFunctionDef {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "#<function {:?}.{}>",
-            todo!("module name"),
-            self.name.to_string()
-        )
+impl LogicPath for NativeFunctionDef {
+    fn logic_path(&self) -> ListPia {
+        Arc::new(Node(
+            Value::Sym(self.name.clone()),
+            Value::Pair(self.from_module.logic_path()),
+        ))
     }
 }
 
@@ -121,13 +183,23 @@ impl Module {
     }
 }
 
-lazy_static! {
-    pub static ref ANONYMOUS_MODULE_NAME: Arc<Symbol> = Arc::new(Symbol::new("anonymous-module"));
+impl LogicPath for Module {
+    fn logic_path(&self) -> ListPia {
+        self.parent.clone().map_or(
+            Arc::new(Node(Value::Sym(self.name.clone()), Value::Nil)),
+            |x| {
+                Arc::new(Node(
+                    Value::Sym(self.name.clone()),
+                    Value::Pair(x.logic_path()),
+                ))
+            },
+        )
+    }
 }
 
 impl Default for Module {
     fn default() -> Self {
-        Self::new(Arc::new(Symbol::new("anonymous-module")), None)
+        Self::new(ANONYMOUS_MODULE_NAME.clone(), None)
     }
 }
 

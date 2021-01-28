@@ -1,4 +1,8 @@
-use std::{cell::RefCell, collections::LinkedList, sync::Arc};
+use std::{
+    cell::RefCell,
+    collections::{LinkedList, VecDeque},
+    sync::Arc,
+};
 
 use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
@@ -49,7 +53,7 @@ impl ParseFrom<Rule> for Symbol {
             line,
             colum,
             pos,
-            scope: RefCell::new(LinkedList::new()),
+            scope: RefCell::new(VecDeque::new()),
             // value: RefCell::new(None)
         }
     }

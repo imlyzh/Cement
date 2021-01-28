@@ -1,14 +1,20 @@
 use std::sync::Arc;
 
 use super::symbols::*;
+use crate::context::*;
 use crate::error::SyntaxMatchError;
 use crate::values::*;
-use crate::{context::*, syntax};
 
 use super::match_template::*;
 
+impl MacroDef {
+    pub fn loading(parent: Arc<Self>, i: &Value) -> Result<Self, SyntaxMatchError> {
+        todo!()
+    }
+}
+
 impl FunctionDef {
-    pub fn loading(parent: Option<Arc<Self>>, i: &Value) -> Result<Self, SyntaxMatchError> {
+    pub fn loading(parent: Arc<Self>, i: &Value) -> Result<Self, SyntaxMatchError> {
         todo!()
     }
 }

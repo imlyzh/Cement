@@ -1,6 +1,11 @@
 use pest::iterators::Pair;
 use std::{
-    cell::RefCell, collections::LinkedList, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc,
+    cell::RefCell,
+    collections::{LinkedList, VecDeque},
+    fmt::Display,
+    hash::Hash,
+    iter::FromIterator,
+    sync::Arc,
 };
 
 use crate::{context::FunctionDef, utils::string_intern};
@@ -66,7 +71,7 @@ impl std::fmt::Display for Value {
 //  */
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Node(Value, Value);
+pub struct Node(pub Value, pub Value);
 
 impl Node {
     pub fn cons(car: Value, cdr: Value) -> Node {
@@ -202,7 +207,7 @@ pub struct Symbol {
     pub line: usize,
     pub colum: usize,
     pub pos: usize,
-    pub scope: RefCell<LinkedList<Arc<Symbol>>>,
+    pub scope: RefCell<VecDeque<Arc<Symbol>>>,
     // pub value: RefCell<Option<Value>>,
 }
 
@@ -216,7 +221,7 @@ impl Symbol {
             line: 0,
             colum: 0,
             pos: 0,
-            scope: RefCell::new(LinkedList::new()),
+            scope: RefCell::new(VecDeque::new()),
             // value: RefCell::new(None),
         }
     }

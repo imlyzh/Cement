@@ -8,9 +8,10 @@ edition = "2018"
 name = "cementi"
 path = "src/main.rs"
 
-[lib]
-name = "cementlib"
-path = "src/lib.rs"
+
+# [lib]
+# name = "cementlib"
+# path = "src/lib.rs"
 
 [dependencies]
 pest = "2.1.3"
