@@ -95,10 +95,10 @@ pub fn match_template(
             if !(a.len() == 2 && name.get_sym().is_some()) {
                 return Err(SyntaxMatchError::MatchError);
             }
-            if !a.car().get_sym().is_some() {
-                return Err(SyntaxMatchError::MatchError);
-            }
-            let tp = a.car().get_sym().unwrap();
+            let tp = a
+                .car()
+                .get_sym()
+                .map_or(Err(SyntaxMatchError::MatchError), Ok)?;
             let tpid = &*tp.id;
             if tpid == "quote" && name == b {
                 return Ok(());

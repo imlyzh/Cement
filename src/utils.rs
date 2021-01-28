@@ -23,7 +23,7 @@ pub fn state_machine(
 ) -> (VecDeque<char>, bool) {
     if is_escape {
         prev.push_back(escape_char(item));
-        is_escape = false;
+        return (prev, false);
     }
     if item == '\\' {
         is_escape = true;
