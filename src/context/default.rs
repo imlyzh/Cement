@@ -15,10 +15,10 @@ impl Module {
 }
 
 #[derive(Debug, Clone)]
-pub struct ModuleHandle (pub Handle<Module>);
+pub struct ModuleHandle(pub Handle<Module>);
 
 impl Default for ModuleHandle {
     fn default() -> Self {
-		ModuleHandle(Module::new(ANONYMOUS_MODULE_NAME.clone(), None))
+        ModuleHandle(Module::new(ANONYMOUS_MODULE_NAME.clone(), None))
     }
 }

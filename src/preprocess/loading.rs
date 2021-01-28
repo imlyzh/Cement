@@ -37,7 +37,6 @@ impl Module {
         if i.len() == 1 {
             let mut ctx = MatchRecord::default();
             match_template(&mut ctx, &MODULE_MATCH_TEMP, &i.car())?;
-
             let name = ctx
                 .maps
                 .borrow()
@@ -56,7 +55,8 @@ impl Module {
             let body: Vec<Value> = body.0.map_or([].iter().map(Value::clone).collect(), |x| {
                 x.iter().collect()
             });
-            body.iter().map(|i| FunctionDef::loading(None, m.clone(), i));
+            body.iter()
+                .map(|i| FunctionDef::loading(None, m.clone(), i));
             todo!()
         } else {
             let r = Module::new(ANONYMOUS_MODULE_NAME.clone(), parent);

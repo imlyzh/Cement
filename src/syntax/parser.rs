@@ -1,7 +1,4 @@
-use std::{
-    cell::RefCell,
-    collections::{VecDeque},
-};
+use std::{cell::RefCell, collections::VecDeque};
 
 use pest::error::Error;
 use pest::iterators::{Pair, Pairs};

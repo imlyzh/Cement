@@ -1,11 +1,6 @@
 use pest::iterators::Pair;
 use std::{
-    cell::RefCell,
-    collections::{VecDeque},
-    fmt::Display,
-    hash::Hash,
-    iter::FromIterator,
-    sync::Arc,
+    cell::RefCell, collections::VecDeque, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc,
 };
 
 use crate::{context::FunctionDef, utils::string_intern};
