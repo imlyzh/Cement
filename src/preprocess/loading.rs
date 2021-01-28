@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use super::symbols::*;
 use crate::context::*;
 use crate::error::SyntaxMatchError;
@@ -8,7 +6,7 @@ use crate::values::*;
 use super::match_template::*;
 
 #[derive(Debug, Clone)]
-struct UseSentence(pub Arc<Symbol>);
+struct UseSentence(pub Handle<Symbol>);
 
 #[derive(Debug)]
 enum ModuleItem {
@@ -20,8 +18,8 @@ enum ModuleItem {
 pub trait Loading {
     type Output;
     fn loading(
-        parent: Option<Arc<FunctionDef>>,
-        from_module: Arc<Module>,
+        parent: Option<Handle<FunctionDef>>,
+        from_module: Handle<Module>,
         i: &Value,
     ) -> Result<Self::Output, SyntaxMatchError>;
 }
@@ -30,8 +28,8 @@ impl Loading for MacroDef {
     type Output = Self;
 
     fn loading(
-        _: Option<Arc<FunctionDef>>,
-        _from_module: Arc<Module>,
+        _: Option<Handle<FunctionDef>>,
+        _from_module: Handle<Module>,
         _i: &Value,
     ) -> Result<Self::Output, SyntaxMatchError> {
         todo!()
@@ -42,8 +40,8 @@ impl Loading for FunctionDef {
     type Output = Self;
 
     fn loading(
-        _parent: Option<Arc<Self>>,
-        _from_module: Arc<Module>,
+        _parent: Option<Handle<Self>>,
+        _from_module: Handle<Module>,
         _i: &Value,
     ) -> Result<Self::Output, SyntaxMatchError> {
         todo!()
@@ -54,11 +52,19 @@ impl Loading for UseSentence {
     type Output = Self;
 
     fn loading(
-        _: Option<Arc<FunctionDef>>,
-        _from_module: Arc<Module>,
-        _i: &Value,
+        _: Option<Handle<FunctionDef>>,
+        _from_module: Handle<Module>,
+        i: &Value,
     ) -> Result<Self::Output, SyntaxMatchError> {
-        todo!()
+        let mut ctx = MatchRecord::default();
+		if match_template(&mut ctx, &USE_MATCH_TEMP, i).is_ok() {
+
+		}
+		let mut ctx = MatchRecord::default();
+		if match_template(&mut ctx, &USE_MATCH_TEMP1, i).is_ok() {
+
+		}
+		todo!()
     }
 }
 
@@ -66,8 +72,8 @@ impl Loading for ModuleItem {
     type Output = Self;
 
     fn loading(
-        parent: Option<Arc<FunctionDef>>,
-        from_module: Arc<Module>,
+        parent: Option<Handle<FunctionDef>>,
+        from_module: Handle<Module>,
         i: &Value,
     ) -> Result<Self::Output, SyntaxMatchError> {
         if let Ok(x) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
@@ -84,7 +90,7 @@ impl Loading for ModuleItem {
 }
 
 impl Module {
-    pub fn loading(parent: Option<Arc<Self>>, i: &ListPia) -> Result<Self, SyntaxMatchError> {
+    pub fn loading(parent: Option<Handle<Self>>, i: &ListPia) -> Result<Self, SyntaxMatchError> {
         if i.len() == 1 {
             let mut ctx = MatchRecord::default();
             match_template(&mut ctx, &MODULE_MATCH_TEMP, &i.car())?;

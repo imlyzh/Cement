@@ -1,5 +1,5 @@
 use std::iter::FromIterator;
-use std::{collections::VecDeque, sync::Arc};
+use std::{collections::VecDeque};
 
 use crate::values::Handle;
 
@@ -47,6 +47,6 @@ pub fn str2char(i: &str) -> char {
 }
 
 #[inline]
-pub fn string_intern(i: &str) -> Arc<String> {
+pub fn string_intern(i: &str) -> Handle<String> {
     Handle::new(String::from(i))
 }

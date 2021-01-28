@@ -8,11 +8,19 @@ use pest_derive::*;
 use crate::utils::{escape_str, str2char};
 use crate::{utils::string_intern, values::*};
 
+
+pub type ParseError = Error<Rule>;
+
 #[derive(Parser)]
 #[grammar = "./syntax/grammar.pest"]
 pub struct Cement {}
 
-pub type ParseError = Error<Rule>;
+pub trait ParseFrom<T>
+where
+    Self: std::marker::Sized,
+{
+    fn parse_from(pair: Pair<T>) -> Self;
+}
 
 impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {

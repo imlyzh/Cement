@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, sync::Arc};
+use std::{cell::RefCell, collections::HashMap};
 
 use multimap::MultiMap;
 
@@ -8,8 +8,8 @@ use crate::values::*;
 
 #[derive(Debug, Default)]
 pub struct MatchRecord {
-    pub maps: RefCell<HashMap<Arc<Symbol>, Value>>,
-    pub extend_maps: RefCell<HashMap<Arc<Symbol>, NodeExtend>>,
+    pub maps: RefCell<HashMap<Handle<Symbol>, Value>>,
+    pub extend_maps: RefCell<HashMap<Handle<Symbol>, NodeExtend>>,
 }
 
 pub fn match_template(
@@ -42,14 +42,12 @@ pub fn match_template(
                 return Ok(());
             }
 
-            println!("lens: {}, {}", a.len(), b.len());
             if a.len() - 2 > b.len() {
                 return Err(SyntaxMatchError::MatchListSizeError);
             }
             let extend_temp = unsafe { a_lst.get_unchecked(a_lst.len() - 2) };
             let mut a_lst = a_lst[0..a_lst.len() - 2].iter();
 
-            println!("a_lst len: {}", a_lst.len());
             a_lst.try_for_each(|x| {
                 if *x == EXTEND_SYM.clone() {
                     Err(SyntaxMatchError::ExtendInMiddleError(x.get_sym().unwrap()))
@@ -59,8 +57,6 @@ pub fn match_template(
             })?;
             let b_expand_lst = b_lst[a_lst.len()..b_lst.len()].iter();
             let b_lst = b_lst[0..a_lst.len()].iter();
-
-            println!("b_lst len: {}", b_lst.len());
 
             a_lst
                 .zip(b_lst)

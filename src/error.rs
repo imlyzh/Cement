@@ -1,15 +1,13 @@
-use std::sync::Arc;
-
-use crate::syntax::parser::ParseError;
+use crate::{syntax::parser::ParseError, values::Handle};
 use crate::values::Symbol;
 
 #[derive(Debug)]
 pub enum SyntaxMatchError {
     MatchError,
     MatchListSizeError,
-    ExtendInMiddleError(Arc<Symbol>),
-    RepeatedSymbol(Arc<Symbol>),
-    SExprTypeCheckError(Arc<Symbol>),
+    ExtendInMiddleError(Handle<Symbol>),
+    RepeatedSymbol(Handle<Symbol>),
+    SExprTypeCheckError(Handle<Symbol>),
 }
 
 #[derive(Debug)]

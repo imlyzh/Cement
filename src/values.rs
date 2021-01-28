@@ -1,4 +1,3 @@
-use pest::iterators::Pair;
 use std::{
     cell::RefCell, collections::VecDeque, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc,
 };
@@ -17,7 +16,7 @@ pub enum Value {
     Float(f64),
     Str(Handle<String>),
     Sym(Handle<Symbol>),
-    // List(Arc<List>),
+    // List(Handle<List>),
     Pair(Handle<Node>),
     Vec(Handle<Vec<Value>>),
     Function(Handle<FunctionDef>),
@@ -41,11 +40,11 @@ impl Value {
     impl_get_item!(get_int, Int, i64);
     impl_get_item!(get_uint, Uint, u64);
     impl_get_item!(get_float, Float, f64);
-    impl_get_item!(get_str, Str, Arc<String>);
-    impl_get_item!(get_sym, Sym, Arc<Symbol>);
-    impl_get_item!(get_pair, Pair, Arc<Node>);
-    impl_get_item!(get_vec, Vec, Arc<Vec<Value>>);
-    impl_get_item!(get_fun, Function, Arc<FunctionDef>);
+    impl_get_item!(get_str, Str, Handle<String>);
+    impl_get_item!(get_sym, Sym, Handle<Symbol>);
+    impl_get_item!(get_pair, Pair, Handle<Node>);
+    impl_get_item!(get_vec, Vec, Handle<Vec<Value>>);
+    impl_get_item!(get_fun, Function, Handle<FunctionDef>);
 }
 
 /*
@@ -155,10 +154,10 @@ impl FromIterator<Value> for NodeExtend {
 }
 
 #[derive(Debug)]
-pub struct NodeIter(pub RefCell<Option<Arc<Node>>>);
+pub struct NodeIter(pub RefCell<Option<Handle<Node>>>);
 
 impl NodeIter {
-    pub fn new(i: Arc<Node>) -> Self {
+    pub fn new(i: Handle<Node>) -> Self {
         NodeIter(RefCell::new(Some(i)))
     }
 }
@@ -182,7 +181,7 @@ impl Iterator for NodeIter {
     }
 }
 
-pub type ListPia = Arc<Node>;
+pub type ListPia = Handle<Node>;
 
 // #[derive(Debug, Clone, PartialEq)]
 // pub struct List(pub ListPia);
@@ -200,11 +199,11 @@ impl std::fmt::Display for List {
 
 #[derive(Debug, Clone, Eq)]
 pub struct Symbol {
-    pub id: Arc<String>,
+    pub id: Handle<String>,
     pub line: usize,
     pub colum: usize,
     pub pos: usize,
-    pub scope: RefCell<VecDeque<Arc<Symbol>>>,
+    pub scope: RefCell<VecDeque<Handle<Symbol>>>,
     // pub value: RefCell<Option<Value>>,
 }
 
@@ -240,11 +239,4 @@ impl Hash for Symbol {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
     }
-}
-
-pub trait ParseFrom<T>
-where
-    Self: std::marker::Sized,
-{
-    fn parse_from(pair: Pair<T>) -> Self;
 }

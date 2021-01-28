@@ -6,11 +6,11 @@ pub mod partial_eq;
 use std::{
     cell::RefCell,
     collections::{HashMap, LinkedList},
-    sync::{Arc, Mutex},
+    sync::{Mutex},
 };
 
 use crate::preprocess::symbols::*;
-use crate::values::{Symbol, Value};
+use crate::values::{Symbol, Value, Handle};
 
 #[derive(Debug)]
 pub struct RuntimeError();
@@ -26,16 +26,16 @@ pub enum MacroDef {
 
 #[derive(Debug)]
 pub struct TempMacro {
-    name: Arc<Symbol>,
-    from_module: Arc<Module>,
-    pairs: Vec<(Value, Value)>,
+    name: Handle<Symbol>,
+    from_module: Handle<Module>,
+    pairs: Handle<(Value, Value)>,
 }
 
 #[derive(Debug)]
 pub struct ProcessMacro {
-    name: Arc<Symbol>,
-    from_module: Arc<Module>,
-    body: Arc<FunctionDef>,
+    name: Handle<Symbol>,
+    from_module: Handle<Module>,
+    body: Handle<FunctionDef>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -46,44 +46,46 @@ pub enum FunctionDef {
 
 #[derive(Debug)]
 pub struct UserFunctionDef {
-    name: Arc<Symbol>,
-    from_module: Arc<Module>,
-    parent: Option<Arc<FunctionDef>>,
-    params: Vec<Arc<Symbol>>,
+    name: Handle<Symbol>,
+    from_module: Handle<Module>,
+    parent: Option<Handle<FunctionDef>>,
+    params: Vec<Handle<Symbol>>,
     body: Vec<Value>,
 }
 
+type NativeInterface = fn(Vec<Value>) -> CResult;
+
 #[derive(Debug)]
 pub struct NativeFunctionDef {
-    name: Arc<Symbol>,
-    from_module: Arc<Module>,
-    params: Option<Vec<Arc<Symbol>>>,
+    name: Handle<Symbol>,
+    from_module: Handle<Module>,
+    params: Option<Vec<Handle<Symbol>>>,
     is_pure: bool,
-    body: extern "C" fn(Vec<Value>) -> CResult,
+    body: NativeInterface,
 }
 
 #[derive(Debug)]
 pub struct Module {
-    name: Arc<Symbol>,
-    parent: Option<Arc<Module>>,
-    module_table: Mutex<HashMap<Arc<Symbol>, Arc<Module>>>,
-    macro_table: Mutex<HashMap<Arc<Symbol>, Arc<MacroDef>>>,
-    function_table: Mutex<HashMap<Arc<Symbol>, Arc<FunctionDef>>>,
+    name: Handle<Symbol>,
+    parent: Option<Handle<Module>>,
+    module_table: Mutex<HashMap<Handle<Symbol>, Handle<Module>>>,
+    macro_table: Mutex<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
+    function_table: Mutex<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
 }
 
 #[derive(Debug, Default)]
 pub struct EnvContext {
-    pub module_table: HashMap<Arc<Symbol>, Arc<Module>>,
+    pub module_table: HashMap<Handle<Symbol>, Handle<Module>>,
 }
 
 #[derive(Debug, Default)]
 pub struct ThreadContext {
-    pub env_context: Arc<EnvContext>,
+    pub env_context: Handle<EnvContext>,
     pub frame_stack: RefCell<LinkedList<FunctionContext>>,
 }
 
 #[derive(Debug)]
 pub struct FunctionContext {
-    pub namespace: HashMap<Arc<Symbol>, Value>,
-    pub funcinfo: Arc<FunctionDef>,
+    pub namespace: HashMap<Handle<Symbol>, Value>,
+    pub funcinfo: Handle<FunctionDef>,
 }

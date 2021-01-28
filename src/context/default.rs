@@ -3,7 +3,7 @@ use crate::values::Handle;
 use super::*;
 
 impl Module {
-    pub fn new(name: Arc<Symbol>, parent: Option<Arc<Module>>) -> Handle<Self> {
+    pub fn new(name: Handle<Symbol>, parent: Option<Handle<Module>>) -> Handle<Self> {
         Handle::new(Module {
             name,
             parent,
