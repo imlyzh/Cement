@@ -1,3 +1,4 @@
+pub mod default;
 pub mod display;
 pub mod logic_path;
 pub mod partial_eq;
@@ -68,24 +69,6 @@ pub struct Module {
     module_table: Mutex<HashMap<Arc<Symbol>, Arc<Module>>>,
     macro_table: Mutex<HashMap<Arc<Symbol>, Arc<MacroDef>>>,
     function_table: Mutex<HashMap<Arc<Symbol>, Arc<FunctionDef>>>,
-}
-
-impl Module {
-    pub fn new(name: Arc<Symbol>, parent: Option<Arc<Module>>) -> Self {
-        Module {
-            name,
-            parent,
-            module_table: Mutex::new(HashMap::new()),
-            macro_table: Mutex::new(HashMap::new()),
-            function_table: Mutex::new(HashMap::new()),
-        }
-    }
-}
-
-impl Default for Module {
-    fn default() -> Self {
-        Self::new(ANONYMOUS_MODULE_NAME.clone(), None)
-    }
 }
 
 #[derive(Debug, Default)]

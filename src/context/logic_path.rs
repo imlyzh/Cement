@@ -16,7 +16,7 @@ impl LogicPath for MacroDef {
 
 impl LogicPath for TempMacro {
     fn logic_path(&self) -> ListPia {
-        Arc::new(Node(
+        Handle::new(Node(
             Value::Sym(self.name.clone()),
             Value::Pair(self.from_module.logic_path()),
         ))
@@ -25,7 +25,7 @@ impl LogicPath for TempMacro {
 
 impl LogicPath for ProcessMacro {
     fn logic_path(&self) -> ListPia {
-        Arc::new(Node(
+        Handle::new(Node(
             Value::Sym(self.name.clone()),
             Value::Pair(self.from_module.logic_path()),
         ))
@@ -44,12 +44,12 @@ impl LogicPath for FunctionDef {
 impl LogicPath for UserFunctionDef {
     fn logic_path(&self) -> ListPia {
         self.parent.clone().map_or(
-            Arc::new(Node(
+            Handle::new(Node(
                 Value::Sym(self.name.clone()),
                 Value::Pair(self.from_module.logic_path()),
             )),
             |x| {
-                Arc::new(Node(
+                Handle::new(Node(
                     Value::Sym(self.name.clone()),
                     Value::Pair(x.logic_path()),
                 ))
@@ -60,7 +60,7 @@ impl LogicPath for UserFunctionDef {
 
 impl LogicPath for NativeFunctionDef {
     fn logic_path(&self) -> ListPia {
-        Arc::new(Node(
+        Handle::new(Node(
             Value::Sym(self.name.clone()),
             Value::Pair(self.from_module.logic_path()),
         ))
@@ -70,9 +70,9 @@ impl LogicPath for NativeFunctionDef {
 impl LogicPath for Module {
     fn logic_path(&self) -> ListPia {
         self.parent.clone().map_or(
-            Arc::new(Node(Value::Sym(self.name.clone()), Value::Nil)),
+            Handle::new(Node(Value::Sym(self.name.clone()), Value::Nil)),
             |x| {
-                Arc::new(Node(
+                Handle::new(Node(
                     Value::Sym(self.name.clone()),
                     Value::Pair(x.logic_path()),
                 ))

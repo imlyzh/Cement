@@ -1,7 +1,7 @@
 use pest::iterators::Pair;
 use std::{
     cell::RefCell,
-    collections::{LinkedList, VecDeque},
+    collections::{VecDeque},
     fmt::Display,
     hash::Hash,
     iter::FromIterator,
@@ -9,6 +9,8 @@ use std::{
 };
 
 use crate::{context::FunctionDef, utils::string_intern};
+
+pub type Handle<T> = Arc<T>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -18,12 +20,12 @@ pub enum Value {
     Int(i64),
     Uint(u64),
     Float(f64),
-    Str(Arc<String>),
-    Sym(Arc<Symbol>),
+    Str(Handle<String>),
+    Sym(Handle<Symbol>),
     // List(Arc<List>),
-    Pair(Arc<Node>),
-    Vec(Arc<Vec<Value>>),
-    Function(Arc<FunctionDef>),
+    Pair(Handle<Node>),
+    Vec(Handle<Vec<Value>>),
+    Function(Handle<FunctionDef>),
 }
 
 macro_rules! impl_get_item {
@@ -110,7 +112,7 @@ impl Node {
     }
 
     pub fn iter(&self) -> NodeIter {
-        NodeIter::new(Arc::new(self.clone()))
+        NodeIter::new(Handle::new(self.clone()))
     }
 
     pub fn rev(i: &Value) -> Value {
@@ -120,9 +122,9 @@ impl Node {
                 let Node(car, cdr) = &*v.clone();
                 let r = Node::cons(
                     Node::rev(cdr),
-                    Value::Pair(Arc::new(Node::cons(car.clone(), Value::Nil))),
+                    Value::Pair(Handle::new(Node::cons(car.clone(), Value::Nil))),
                 );
-                Value::Pair(Arc::new(r))
+                Value::Pair(Handle::new(r))
             }
             _ => i.clone(),
         }
@@ -135,7 +137,7 @@ pub struct NodeExtend(pub Option<Node>);
 impl NodeExtend {
     #[inline]
     pub fn into_value(self) -> Value {
-        self.0.map_or(Value::Nil, |x| Value::Pair(Arc::new(x)))
+        self.0.map_or(Value::Nil, |x| Value::Pair(Handle::new(x)))
     }
 }
 

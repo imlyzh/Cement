@@ -1,6 +1,8 @@
 use std::iter::FromIterator;
 use std::{collections::VecDeque, sync::Arc};
 
+use crate::values::Handle;
+
 #[inline]
 pub fn escape_char(i: char) -> char {
     match i {
@@ -47,5 +49,5 @@ pub fn str2char(i: &str) -> char {
 
 #[inline]
 pub fn string_intern(i: &str) -> Arc<String> {
-    Arc::new(String::from(i))
+    Handle::new(String::from(i))
 }

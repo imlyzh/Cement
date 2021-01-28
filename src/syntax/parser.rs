@@ -1,7 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{LinkedList, VecDeque},
-    sync::Arc,
+    collections::{VecDeque},
 };
 
 use pest::error::Error;
@@ -22,8 +21,8 @@ impl ParseFrom<Rule> for Value {
     fn parse_from(pair: Pair<Rule>) -> Self {
         match pair.as_rule() {
             Rule::list => NodeExtend::parse_from(pair).into(),
-            Rule::symbol => Value::Sym(Arc::new(Symbol::parse_from(pair))),
-            Rule::string_lit => Value::Str(Arc::new(escape_str(pair.as_str()))),
+            Rule::symbol => Value::Sym(Handle::new(Symbol::parse_from(pair))),
+            Rule::string_lit => Value::Str(Handle::new(escape_str(pair.as_str()))),
             Rule::uint_lit => Value::Uint(pair.as_str().parse().unwrap()),
             Rule::int_lit => Value::Int(pair.as_str().parse().unwrap()),
             Rule::float_lit => Value::Float(pair.as_str().parse().unwrap()),
