@@ -146,7 +146,7 @@ impl FromIterator<Value> for NodeExtend {
     fn from_iter<T: IntoIterator<Item = Value>>(iter: T) -> Self {
         let mut iter = iter.into_iter();
         if let Some(car) = iter.next() {
-            let cdr = NodeExtend::from_iter(iter).into_value();
+            let cdr = Self::from_iter(iter).into_value();
             NodeExtend(Some(Node(car, cdr)))
         } else {
             NodeExtend(None)

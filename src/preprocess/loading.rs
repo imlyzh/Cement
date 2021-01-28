@@ -79,7 +79,7 @@ impl Loading for ModuleItem {
         if let Ok(x) = MacroDef::loading(parent, from_module, i) {
             return Ok(ModuleItem::MacroDef(x));
         }
-        return Err(SyntaxMatchError::MatchError);
+        Err(SyntaxMatchError::MatchError)
     }
 }
 
