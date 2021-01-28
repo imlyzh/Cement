@@ -170,12 +170,12 @@ impl Iterator for NodeIter {
         let r = &*self.0.borrow().clone()?;
         match r.clone() {
             Node(car, Value::Pair(cdr)) => {
-                self.0.replace(Some(cdr.clone()));
-                Some(car.clone())
+                self.0.replace(Some(cdr));
+                Some(car)
             }
             Node(car, Value::Nil) => {
                 self.0.replace(None);
-                Some(car.clone())
+                Some(car)
             }
             Node(_, _) => None,
         }

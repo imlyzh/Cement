@@ -15,7 +15,7 @@ use syntax::parser::*;
 fn main() -> ! {
     loop {
         // read
-        stdout().write(">>> ".as_bytes()).unwrap();
+        stdout().write_all(">>> ".as_bytes()).unwrap();
         stdout().flush().unwrap();
         let mut a = String::new();
         stdin().read_line(&mut a).unwrap();

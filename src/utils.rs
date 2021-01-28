@@ -24,13 +24,12 @@ pub fn state_machine(
     if is_escape {
         prev.push_back(escape_char(item));
         is_escape = false;
+    }
+    if item == '\\' {
+        is_escape = true;
     } else {
-        if item == '\\' {
-            is_escape = true;
-        } else {
-            prev.push_back(item);
-            is_escape = false;
-        }
+        prev.push_back(item);
+        is_escape = false;
     }
     (prev, is_escape)
 }
@@ -44,7 +43,7 @@ pub fn escape_str(i: &str) -> String {
 
 #[inline]
 pub fn str2char(i: &str) -> char {
-    i.chars().nth(0).unwrap()
+    i.chars().next().unwrap()
 }
 
 #[inline]

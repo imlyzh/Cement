@@ -8,16 +8,16 @@ use crate::values::*;
 use super::match_template::*;
 
 impl MacroDef {
-    pub fn loading(from_module: Arc<Module>, i: &Value) -> Result<Self, SyntaxMatchError> {
+    pub fn loading(_from_module: Arc<Module>, _i: &Value) -> Result<Self, SyntaxMatchError> {
         todo!()
     }
 }
 
 impl FunctionDef {
     pub fn loading(
-        parent: Option<Arc<Self>>,
-        from_module: Arc<Module>,
-        i: &Value,
+        _parent: Option<Arc<Self>>,
+        _from_module: Arc<Module>,
+        _i: &Value,
     ) -> Result<Self, SyntaxMatchError> {
         todo!()
     }
@@ -26,7 +26,7 @@ impl FunctionDef {
 #[derive(Debug, Clone)]
 struct UseSentence(pub Arc<Symbol>);
 
-enum Union {
+enum ModuleItem {
     FunctionDef(FunctionDef),
     MacroDef(MacroDef),
     UseSentence(UseSentence),
@@ -55,11 +55,18 @@ impl Module {
             let body: Vec<Value> = body.0.map_or([].iter().map(Value::clone).collect(), |x| {
                 x.iter().collect()
             });
-            body.iter()
-                .map(|i| FunctionDef::loading(None, m.clone(), i));
+            /*
+            let body: Result<Vec<ModuleItem>, SyntaxMatchError> = body.iter()
+                .map(|i| FunctionDef::loading(None, m.clone(), i))
+                .collect();
+
+                .for_each(|_x| {
+
+                });
+             */
             todo!()
         } else {
-            let r = Module::new(ANONYMOUS_MODULE_NAME.clone(), parent);
+            let _r = Module::new(ANONYMOUS_MODULE_NAME.clone(), parent);
             todo!()
         }
     }
