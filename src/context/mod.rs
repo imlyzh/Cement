@@ -1,12 +1,14 @@
 pub mod default;
 pub mod display;
+pub mod find_name;
+pub mod get_name;
 pub mod logic_path;
 pub mod partial_eq;
 
 use std::{
     cell::RefCell,
     collections::{HashMap, LinkedList},
-    sync::Mutex,
+    sync::RwLock,
 };
 
 use crate::preprocess::symbols::*;
@@ -68,9 +70,9 @@ pub struct NativeFunctionDef {
 pub struct Module {
     pub name: Handle<Symbol>,
     pub parent: Option<Handle<Module>>,
-    pub module_table: Mutex<HashMap<Handle<Symbol>, Handle<Module>>>,
-    pub macro_table: Mutex<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
-    pub function_table: Mutex<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
+    pub module_table: RwLock<HashMap<Handle<Symbol>, Handle<Module>>>,
+    pub macro_table: RwLock<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
+    pub function_table: RwLock<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
 }
 
 #[derive(Debug, Default)]

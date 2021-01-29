@@ -7,6 +7,9 @@ pub enum SyntaxMatchError {
     MatchListSizeError,
     ExtendInMiddleError(Handle<Symbol>),
     RepeatedSymbol(Handle<Symbol>),
+    RepeatedModule(Handle<Symbol>),
+    RepeatedMacro(Handle<Symbol>),
+    RepeatedFunction(Handle<Symbol>),
     SExprTypeCheckError(Handle<Symbol>),
 }
 

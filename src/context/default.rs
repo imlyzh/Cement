@@ -7,9 +7,9 @@ impl Module {
         Handle::new(Module {
             name,
             parent,
-            module_table: Mutex::new(HashMap::new()),
-            macro_table: Mutex::new(HashMap::new()),
-            function_table: Mutex::new(HashMap::new()),
+            module_table: RwLock::new(HashMap::new()),
+            macro_table: RwLock::new(HashMap::new()),
+            function_table: RwLock::new(HashMap::new()),
         })
     }
 }

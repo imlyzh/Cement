@@ -1,3 +1,5 @@
+use get_name::GetName;
+
 use super::symbols::*;
 use crate::context::*;
 use crate::error::SyntaxMatchError;
@@ -191,7 +193,41 @@ impl Loading for Module {
             .iter()
             .map(|i| ModuleItem::loading(None, modu.clone(), i))
             .collect();
-        result?.iter().for_each(|_x| {});
+        result?.iter().try_for_each(|x| match x {
+            ModuleItem::UseSentence(_) => {
+                todo!("register use module");
+            }
+            ModuleItem::FunctionDef(x) => {
+                modu.function_table
+                    .write()
+                    .unwrap()
+                    .insert(x.get_name(), x.clone())
+                    .map_or(Ok(()), |_| {
+                        Err(SyntaxMatchError::RepeatedFunction(x.get_name()))
+                    })?;
+                Ok(())
+            }
+            ModuleItem::MacroDef(x) => {
+                modu.macro_table
+                    .write()
+                    .unwrap()
+                    .insert(x.get_name(), x.clone())
+                    .map_or(Ok(()), |_| {
+                        Err(SyntaxMatchError::RepeatedMacro(x.get_name()))
+                    })?;
+                Ok(())
+            }
+            ModuleItem::ModuleDef(x) => {
+                modu.module_table
+                    .write()
+                    .unwrap()
+                    .insert(x.get_name(), x.clone())
+                    .map_or(Ok(()), |_| {
+                        Err(SyntaxMatchError::RepeatedModule(x.get_name()))
+                    })?;
+                Ok(())
+            }
+        })?;
 
         return Ok(modu);
     }
