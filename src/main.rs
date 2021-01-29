@@ -19,10 +19,10 @@ fn main() -> ! {
         stdout().flush().unwrap();
         let mut a = String::new();
         stdin().read_line(&mut a).unwrap();
-		let a = a.trim();
-		if a.len() == 0 {
-			continue;
-		}
+        let a = a.trim();
+        if a.len() == 0 {
+            continue;
+        }
         // parse
         let temp = repl_parse("(($sym name) ...)").unwrap();
         let res = repl_parse(a).unwrap();

@@ -26,16 +26,16 @@ pub enum MacroDef {
 
 #[derive(Debug)]
 pub struct TempMacro {
-    name: Handle<Symbol>,
-    from_module: Handle<Module>,
-    pairs: Handle<(Value, Value)>,
+    pub name: Handle<Symbol>,
+    pub from_module: Handle<Module>,
+    pub pairs: Vec<(Value, Value)>,
 }
 
 #[derive(Debug)]
 pub struct ProcessMacro {
-    name: Handle<Symbol>,
-    from_module: Handle<Module>,
-    body: Handle<FunctionDef>,
+    pub name: Handle<Symbol>,
+    pub from_module: Handle<Module>,
+    pub body: Handle<FunctionDef>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -46,31 +46,31 @@ pub enum FunctionDef {
 
 #[derive(Debug)]
 pub struct UserFunctionDef {
-    name: Handle<Symbol>,
-    from_module: Handle<Module>,
-    parent: Option<Handle<FunctionDef>>,
-    params: Vec<Handle<Symbol>>,
-    body: Vec<Value>,
+    pub name: Handle<Symbol>,
+    pub from_module: Handle<Module>,
+    pub parent: Option<Handle<FunctionDef>>,
+    pub params: Vec<Handle<Symbol>>,
+    pub body: Vec<Value>,
 }
 
 type NativeInterface = fn(Vec<Value>) -> CResult;
 
 #[derive(Debug)]
 pub struct NativeFunctionDef {
-    name: Handle<Symbol>,
-    from_module: Handle<Module>,
-    params: Option<Vec<Handle<Symbol>>>,
-    is_pure: bool,
-    body: NativeInterface,
+    pub name: Handle<Symbol>,
+    pub from_module: Handle<Module>,
+    // pub params: Option<Vec<Handle<Symbol>>>,
+    pub is_pure: bool,
+    pub body: NativeInterface,
 }
 
 #[derive(Debug)]
 pub struct Module {
-    name: Handle<Symbol>,
-    parent: Option<Handle<Module>>,
-    module_table: Mutex<HashMap<Handle<Symbol>, Handle<Module>>>,
-    macro_table: Mutex<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
-    function_table: Mutex<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
+    pub name: Handle<Symbol>,
+    pub parent: Option<Handle<Module>>,
+    pub module_table: Mutex<HashMap<Handle<Symbol>, Handle<Module>>>,
+    pub macro_table: Mutex<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
+    pub function_table: Mutex<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
 }
 
 #[derive(Debug, Default)]
