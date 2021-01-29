@@ -162,6 +162,13 @@ impl NodeIter {
     }
 }
 
+impl From<NodeExtend> for NodeIter {
+    fn from(i: NodeExtend) -> Self {
+        let r = i.0.map(Handle::new);
+        NodeIter(RefCell::new(r))
+    }
+}
+
 impl Iterator for NodeIter {
     type Item = Value;
 

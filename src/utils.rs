@@ -1,5 +1,5 @@
+use std::collections::VecDeque;
 use std::iter::FromIterator;
-use std::{collections::VecDeque};
 
 use crate::values::Handle;
 

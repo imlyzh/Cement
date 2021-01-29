@@ -6,11 +6,11 @@ pub mod partial_eq;
 use std::{
     cell::RefCell,
     collections::{HashMap, LinkedList},
-    sync::{Mutex},
+    sync::Mutex,
 };
 
 use crate::preprocess::symbols::*;
-use crate::values::{Symbol, Value, Handle};
+use crate::values::{Handle, Symbol, Value};
 
 #[derive(Debug)]
 pub struct RuntimeError();

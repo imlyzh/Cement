@@ -1,5 +1,5 @@
-use crate::{syntax::parser::ParseError, values::Handle};
 use crate::values::Symbol;
+use crate::{syntax::parser::ParseError, values::Handle};
 
 #[derive(Debug)]
 pub enum SyntaxMatchError {

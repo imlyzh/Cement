@@ -19,9 +19,13 @@ fn main() -> ! {
         stdout().flush().unwrap();
         let mut a = String::new();
         stdin().read_line(&mut a).unwrap();
+		let a = a.trim();
+		if a.len() == 0 {
+			continue;
+		}
         // parse
-        let temp = repl_parse("((quote module) ($sym name) body ...)").unwrap();
-        let res = repl_parse(&a).unwrap();
+        let temp = repl_parse("(($sym name) ...)").unwrap();
+        let res = repl_parse(a).unwrap();
         let mut mr = MatchRecord::default();
         match_template(&mut mr, &temp, &res).unwrap();
         println!("> {:?}", res);

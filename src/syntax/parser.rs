@@ -8,7 +8,6 @@ use pest_derive::*;
 use crate::utils::{escape_str, str2char};
 use crate::{utils::string_intern, values::*};
 
-
 pub type ParseError = Error<Rule>;
 
 #[derive(Parser)]
