@@ -11,30 +11,23 @@ use super::match_template::*;
 struct UseSentence(pub Vec<Handle<Symbol>>);
 
 #[derive(Debug)]
-enum ModuleItem {
-    UseSentence(Handle<UseSentence>),
-    FunctionDef(Handle<FunctionDef>),
-    MacroDef(Handle<MacroDef>),
-    ModuleDef(Handle<Module>),
-}
+enum ModuleItem {}
 
 pub trait Loading {
-    type Output;
     fn loading(
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError>;
+    ) -> Result<(), SyntaxMatchError>;
 }
 
 impl Loading for MacroDef {
-    type Output = Handle<Self>;
-
     fn loading(
         _: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError> {
+    ) -> Result<(), SyntaxMatchError> {
+        /*
         let mut ctx = MatchRecord::default();
         if match_template(&mut ctx, &MACRO_DEF_TEMP, i).is_ok() {
             let name = ctx
@@ -52,8 +45,13 @@ impl Loading for MacroDef {
                 from_module,
                 pairs: vec![(match_value, temp)],
             };
-            return Ok(Handle::new(MacroDef::TempMacro(mcr)));
+            from_module.macro_table.write().unwrap()
+            .insert(name, Handle::new(MacroDef::TempMacro(mcr)))
+            .map_or(Ok(()), |_| {
+                Err(SyntaxMatchError::RepeatedMacro(name))
+            })?;
         }
+        */
         let mut ctx = MatchRecord::default();
         if match_template(&mut ctx, &USE_MATCH_TEMP1, i).is_ok() {
             let name = ctx
@@ -82,36 +80,38 @@ impl Loading for MacroDef {
             let pairs = match_value.zip(temp).collect();
 
             let mcr = TempMacro {
-                name,
-                from_module,
+                name: name.clone(),
+                from_module: from_module.clone(),
                 pairs,
             };
-            return Ok(Handle::new(MacroDef::TempMacro(mcr)));
+            return from_module
+                .macro_table
+                .write()
+                .unwrap()
+				.insert(name.clone(), Handle::new(MacroDef::TempMacro(mcr)))
+				.map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedMacro(name)));
         }
         Err(SyntaxMatchError::MatchError)
     }
 }
 
 impl Loading for FunctionDef {
-    type Output = Handle<Self>;
-
     fn loading(
         _parent: Option<Handle<Self>>,
         _from_module: Handle<Module>,
         _i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError> {
+    ) -> Result<(), SyntaxMatchError> {
         todo!()
     }
 }
 
 impl Loading for UseSentence {
-    type Output = Handle<Self>;
-
     fn loading(
         _: Option<Handle<FunctionDef>>,
         _from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError> {
+    ) -> Result<(), SyntaxMatchError> {
+        /*
         let mut ctx = MatchRecord::default();
         if match_template(&mut ctx, &USE_MATCH_TEMP, i).is_ok() {
             let r = ctx
@@ -121,8 +121,7 @@ impl Loading for UseSentence {
                 .unwrap()
                 .get_sym()
                 .unwrap();
-            return Ok(Handle::new(UseSentence(vec![r])));
-        }
+        }*/
         let mut ctx = MatchRecord::default();
         if match_template(&mut ctx, &USE_MATCH_TEMP1, i).is_ok() {
             let r = ctx
@@ -131,44 +130,42 @@ impl Loading for UseSentence {
                 .get(&NAME_SYM.clone())
                 .unwrap()
                 .clone();
-            let r: Vec<Handle<Symbol>> = NodeIter::from(r).map(|x| x.get_sym().unwrap()).collect();
-            return Ok(Handle::new(UseSentence(r)));
+            let _import_names: Vec<Handle<Symbol>> = NodeIter::from(r).map(|x| x.get_sym().unwrap()).collect();
+            todo!("use register");
+            /*
+            from_module.macro_table.write().unwrap()
+            .insert(name, Handle::new(MacroDef::TempMacro(mcr)))
+            .map_or(Ok(()), |_| {
+                Err(SyntaxMatchError::RepeatedMacro(name))
+            })?;
+            */
         }
         Err(SyntaxMatchError::MatchError)
     }
 }
 
 impl Loading for ModuleItem {
-    type Output = Self;
-
     fn loading(
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError> {
-        if let Ok(x) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
-            return Ok(ModuleItem::FunctionDef(x));
+    ) -> Result<(), SyntaxMatchError> {
+        if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
+        } else if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
+        } else if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
+        } else {
+            return Err(SyntaxMatchError::MatchError);
         }
-        if let Ok(x) = UseSentence::loading(parent.clone(), from_module.clone(), i) {
-            return Ok(ModuleItem::UseSentence(x));
-        }
-        if let Ok(x) = Module::loading(parent.clone(), from_module.clone(), i) {
-            return Ok(ModuleItem::ModuleDef(x));
-        }
-        if let Ok(x) = MacroDef::loading(parent, from_module, i) {
-            return Ok(ModuleItem::MacroDef(x));
-        }
-        Err(SyntaxMatchError::MatchError)
+        Ok(())
     }
 }
 
 impl Loading for Module {
-    type Output = Handle<Self>;
     fn loading(
         _: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Self::Output, SyntaxMatchError> {
+    ) -> Result<(), SyntaxMatchError> {
         let mut ctx = MatchRecord::default();
         match_template(&mut ctx, &MODULE_MATCH_TEMP, i)?;
         let name = ctx
@@ -188,47 +185,17 @@ impl Loading for Module {
             x.iter().collect()
         });
 
-        let modu = Module::new(name, Some(from_module));
-        let result: Result<Vec<ModuleItem>, SyntaxMatchError> = body
-            .iter()
-            .map(|i| ModuleItem::loading(None, modu.clone(), i))
-            .collect();
-        result?.iter().try_for_each(|x| match x {
-            ModuleItem::UseSentence(_) => {
-                todo!("register use module");
-            }
-            ModuleItem::FunctionDef(x) => {
-                modu.function_table
-                    .write()
-                    .unwrap()
-                    .insert(x.get_name(), x.clone())
-                    .map_or(Ok(()), |_| {
-                        Err(SyntaxMatchError::RepeatedFunction(x.get_name()))
-                    })?;
-                Ok(())
-            }
-            ModuleItem::MacroDef(x) => {
-                modu.macro_table
-                    .write()
-                    .unwrap()
-                    .insert(x.get_name(), x.clone())
-                    .map_or(Ok(()), |_| {
-                        Err(SyntaxMatchError::RepeatedMacro(x.get_name()))
-                    })?;
-                Ok(())
-            }
-            ModuleItem::ModuleDef(x) => {
-                modu.module_table
-                    .write()
-                    .unwrap()
-                    .insert(x.get_name(), x.clone())
-                    .map_or(Ok(()), |_| {
-                        Err(SyntaxMatchError::RepeatedModule(x.get_name()))
-                    })?;
-                Ok(())
-            }
-        })?;
-
-        return Ok(modu);
+        let modu = Module::new(name.clone(), Some(from_module.clone()));
+        from_module
+            .module_table
+            .write()
+            .unwrap()
+            .insert(name, modu.clone())
+            .map_or(Ok(()), |_| {
+                Err(SyntaxMatchError::RepeatedModule(modu.get_name()))
+            })?;
+        body.iter()
+            .try_for_each(|i| ModuleItem::loading(None, modu.clone(), i))?;
+        Ok(())
     }
 }
