@@ -1,7 +1,32 @@
-use std::collections::VecDeque;
 use std::iter::FromIterator;
+use std::{
+    collections::{HashMap, VecDeque},
+    sync::RwLock,
+};
+
+use lazy_static::lazy_static;
 
 use crate::values::Handle;
+
+lazy_static! {
+    static ref GLOBAL_INTERN_STRING_POOL: RwLock<HashMap<Handle<String>, Handle<String>>> =
+        RwLock::new(HashMap::new());
+}
+
+#[inline]
+pub fn string_intern(i: &str) -> Handle<String> {
+    let k = Handle::new(i.to_string());
+    {
+        if let Some(x) = GLOBAL_INTERN_STRING_POOL.read().unwrap().get(&k) {
+            return x.clone();
+        }
+    }
+    GLOBAL_INTERN_STRING_POOL
+        .write()
+        .unwrap()
+        .insert(k.clone(), k.clone());
+    k
+}
 
 #[inline]
 pub fn escape_char(i: char) -> char {
@@ -44,9 +69,4 @@ pub fn escape_str(i: &str) -> String {
 #[inline]
 pub fn str2char(i: &str) -> char {
     i.chars().next().unwrap()
-}
-
-#[inline]
-pub fn string_intern(i: &str) -> Handle<String> {
-    Handle::new(String::from(i))
 }
