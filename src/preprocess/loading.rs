@@ -142,7 +142,7 @@ impl Loading for FunctionDef {
                     .sub_function
                     .write()
                     .unwrap()
-                    .insert(name.clone(), f.clone())
+                    .insert(name.clone(), f)
                     .map_or(Ok(()), |_| {
                         Err(SyntaxMatchError::RepeatedFunction(name.clone()))
                     })?;
@@ -206,9 +206,9 @@ impl Loading for ModuleItem {
         from_module: Handle<Module>,
         i: &Value,
     ) -> Result<(), SyntaxMatchError> {
-        if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
-        } else if let Ok(_) = UseSentence::loading(parent.clone(), from_module.clone(), i) {
-        } else if let Ok(_) = MacroDef::loading(parent.clone(), from_module.clone(), i) {
+        if FunctionDef::loading(parent.clone(), from_module.clone(), i).is_ok() {
+        } else if UseSentence::loading(parent.clone(), from_module.clone(), i).is_ok() {
+        } else if MacroDef::loading(parent, from_module, i).is_ok() {
         } else {
             return Err(SyntaxMatchError::MatchError);
         }

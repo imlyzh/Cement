@@ -20,7 +20,7 @@ fn main() -> ! {
         let mut a = String::new();
         stdin().read_line(&mut a).unwrap();
         let a = a.trim();
-        if a.len() == 0 {
+        if a.is_empty() {
             continue;
         }
         // parse
