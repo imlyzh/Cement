@@ -206,11 +206,10 @@ impl Loading for ModuleItem {
         from_module: Handle<Module>,
         i: &Value,
     ) -> Result<(), SyntaxMatchError> {
-        if FunctionDef::loading(parent.clone(), from_module.clone(), i).is_ok() {
-            Ok(())
-        } else if UseSentence::loading(parent.clone(), from_module.clone(), i).is_ok() {
-            Ok(())
-        } else if MacroDef::loading(parent, from_module, i).is_ok() {
+        if FunctionDef::loading(parent.clone(), from_module.clone(), i).is_ok()
+            || UseSentence::loading(parent.clone(), from_module.clone(), i).is_ok()
+            || MacroDef::loading(parent, from_module, i).is_ok()
+        {
             Ok(())
         } else {
             Err(SyntaxMatchError::MatchError)
