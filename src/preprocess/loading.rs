@@ -1,3 +1,5 @@
+use std::{collections::HashMap, sync::RwLock};
+
 use get_name::GetName;
 
 use super::symbols::*;
@@ -88,8 +90,8 @@ impl Loading for MacroDef {
                 .macro_table
                 .write()
                 .unwrap()
-				.insert(name.clone(), Handle::new(MacroDef::TempMacro(mcr)))
-				.map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedMacro(name)));
+                .insert(name.clone(), Handle::new(MacroDef::TempMacro(mcr)))
+                .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedMacro(name)));
         }
         Err(SyntaxMatchError::MatchError)
     }
@@ -97,11 +99,64 @@ impl Loading for MacroDef {
 
 impl Loading for FunctionDef {
     fn loading(
-        _parent: Option<Handle<Self>>,
-        _from_module: Handle<Module>,
-        _i: &Value,
+        parent: Option<Handle<Self>>,
+        from_module: Handle<Module>,
+        i: &Value,
     ) -> Result<(), SyntaxMatchError> {
-        todo!()
+        let mut ctx = MatchRecord::default();
+        match_template(&mut ctx, &USE_MATCH_TEMP1, i)?;
+        let name = ctx
+            .maps
+            .borrow()
+            .get(&NAME_SYM.clone())
+            .unwrap()
+            .get_sym()
+            .unwrap();
+        let params = ctx
+            .extend_maps
+            .borrow()
+            .get(&PARAMS_SYM.clone())
+            .unwrap()
+            .clone();
+        let bodys = ctx
+            .extend_maps
+            .borrow()
+            .get(&BODYS_SYM.clone())
+            .unwrap()
+            .clone();
+        let f = UserFunctionDef {
+            name: name.clone(),
+            from_module: from_module.clone(),
+            parent: parent.clone(),
+            sub_function: RwLock::new(HashMap::new()),
+            params: NodeIter::from(params)
+                .map(|x| x.get_sym().unwrap())
+                .collect(),
+            body: NodeIter::from(bodys).collect(),
+        };
+        let f = Handle::new(FunctionDef::UserFunction(f));
+
+        if let Some(parent) = parent {
+            if let FunctionDef::UserFunction(parent) = &*parent {
+                parent
+                    .sub_function
+                    .write()
+                    .unwrap()
+                    .insert(name.clone(), f.clone())
+                    .map_or(Ok(()), |_| {
+                        Err(SyntaxMatchError::RepeatedFunction(name.clone()))
+					})?;
+				return Ok(());
+			}
+			unreachable!("???你tm是怎么做到Native Function下边定义UserFunction的");
+        }
+        from_module
+            .function_table
+            .write()
+            .unwrap()
+            .insert(name.clone(), f)
+            .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedFunction(name)))?;
+        Ok(())
     }
 }
 
@@ -130,7 +185,8 @@ impl Loading for UseSentence {
                 .get(&NAME_SYM.clone())
                 .unwrap()
                 .clone();
-            let _import_names: Vec<Handle<Symbol>> = NodeIter::from(r).map(|x| x.get_sym().unwrap()).collect();
+            let _import_names: Vec<Handle<Symbol>> =
+                NodeIter::from(r).map(|x| x.get_sym().unwrap()).collect();
             todo!("use register");
             /*
             from_module.macro_table.write().unwrap()
@@ -151,8 +207,8 @@ impl Loading for ModuleItem {
         i: &Value,
     ) -> Result<(), SyntaxMatchError> {
         if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
-        } else if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
-        } else if let Ok(_) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
+        } else if let Ok(_) = UseSentence::loading(parent.clone(), from_module.clone(), i) {
+        } else if let Ok(_) = MacroDef::loading(parent.clone(), from_module.clone(), i) {
         } else {
             return Err(SyntaxMatchError::MatchError);
         }

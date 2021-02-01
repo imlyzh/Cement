@@ -51,6 +51,7 @@ pub struct UserFunctionDef {
     pub name: Handle<Symbol>,
     pub from_module: Handle<Module>,
     pub parent: Option<Handle<FunctionDef>>,
+    pub sub_function: RwLock<HashMap<Handle<Symbol>, Handle<FunctionDef>>>,
     pub params: Vec<Handle<Symbol>>,
     pub body: Vec<Value>,
 }
