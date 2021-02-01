@@ -207,12 +207,14 @@ impl Loading for ModuleItem {
         i: &Value,
     ) -> Result<(), SyntaxMatchError> {
         if FunctionDef::loading(parent.clone(), from_module.clone(), i).is_ok() {
+            Ok(())
         } else if UseSentence::loading(parent.clone(), from_module.clone(), i).is_ok() {
+            Ok(())
         } else if MacroDef::loading(parent, from_module, i).is_ok() {
+            Ok(())
         } else {
-            return Err(SyntaxMatchError::MatchError);
+            Err(SyntaxMatchError::MatchError)
         }
-        Ok(())
     }
 }
 
