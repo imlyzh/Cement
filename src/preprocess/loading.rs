@@ -1,6 +1,7 @@
-use std::{collections::HashMap, iter::FromIterator, sync::RwLock};
+use std::{collections::HashMap, sync::RwLock};
 
 use get_name::GetName;
+use logic_path::get_path;
 
 use super::symbols::*;
 use crate::context::*;
@@ -36,6 +37,8 @@ impl Loading for MacroDef {
                 .unwrap()
                 .get_sym()
                 .unwrap();
+            let path = get_path(None, from_module.clone());
+            name.scope.replace(path);
             let match_value = ctx
                 .extend_maps
                 .borrow()
@@ -87,6 +90,8 @@ impl Loading for FunctionDef {
             .unwrap()
             .get_sym()
             .unwrap();
+        let path = get_path(parent.clone(), from_module.clone());
+        name.scope.replace(path);
         let params = ctx
             .extend_maps
             .borrow()
@@ -151,6 +156,8 @@ impl Loading for Define {
             .unwrap()
             .get_sym()
             .unwrap();
+        let path = get_path(parent.clone(), from_module.clone());
+        name.scope.replace(path);
         let value = ctx.maps.borrow().get(&VALUE_SYM.clone()).unwrap().clone();
         if let Some(parent) = parent {
             if let FunctionDef::UserFunction(parent) = &*parent {
@@ -207,6 +214,8 @@ impl Loading for Module {
             .unwrap()
             .get_sym()
             .unwrap();
+        let path = get_path(None, from_module.clone());
+        name.scope.replace(path);
         let body = ctx
             .extend_maps
             .borrow()

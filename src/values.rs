@@ -210,9 +210,11 @@ pub struct Symbol {
     pub line: usize,
     pub colum: usize,
     pub pos: usize,
-    pub scope: RefCell<VecDeque<Handle<Symbol>>>,
+    pub scope: RefCell<SymbolList>,
     // pub value: RefCell<Option<Value>>,
 }
+
+pub type SymbolList = VecDeque<Handle<Symbol>>;
 
 unsafe impl Sync for Symbol {}
 unsafe impl Send for Symbol {}
