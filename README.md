@@ -4,7 +4,7 @@ The Compiler-oriented programming language
 
 ## Numbering
 
-+ **The startup time(Plan)**: 1th Five Month Plan
++ **The startup time(Plan)**: 1th Five Month Plan(2020.10~1021.3)
 + **Project**: Pr14
 
 ## Status

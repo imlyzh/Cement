@@ -111,8 +111,8 @@ impl Loading for FunctionDef {
         let f = UserFunctionDef {
             name,
             from_module,
-			parent,
-			body,
+            parent,
+            body,
             constant_table: RwLock::new(HashMap::new()),
             params: NodeIter::from(params)
                 .map(|x| x.get_sym().unwrap())
