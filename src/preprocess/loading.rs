@@ -107,16 +107,16 @@ impl Loading for FunctionDef {
         let bodys: Result<Vec<Value>, SyntaxMatchError> = NodeIter::from(bodys)
             .map(|x| Expr::loading(parent.clone(), from_module.clone(), &x))
             .collect();
-        let bodys = bodys?;
+        let body = bodys?;
         let f = UserFunctionDef {
-            name: name.clone(),
-            from_module: from_module.clone(),
-            parent: parent.clone(),
+            name,
+            from_module,
+			parent,
+			body,
             constant_table: RwLock::new(HashMap::new()),
             params: NodeIter::from(params)
                 .map(|x| x.get_sym().unwrap())
                 .collect(),
-            body: bodys,
         };
         let f = Handle::new(FunctionDef::UserFunction(f));
         Ok(Value::Function(f))
