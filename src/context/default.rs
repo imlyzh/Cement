@@ -9,7 +9,7 @@ impl Module {
             parent,
             module_table: RwLock::new(HashMap::new()),
             macro_table: RwLock::new(HashMap::new()),
-            function_table: RwLock::new(HashMap::new()),
+            constant_table: RwLock::new(HashMap::new()),
         })
     }
 }
