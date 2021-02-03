@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::RwLock};
+use std::{collections::HashMap, iter::FromIterator, sync::RwLock};
 
 use get_name::GetName;
 use logic_path::get_path;
@@ -104,7 +104,10 @@ impl Loading for FunctionDef {
             .get(&BODYS_SYM.clone())
             .unwrap()
             .clone();
-        let bodys = NodeIter::from(bodys).map(|_x| todo!("function expr loading"));
+        let bodys: Result<Vec<Value>, SyntaxMatchError> = NodeIter::from(bodys)
+            .map(|x| Expr::loading(parent.clone(), from_module.clone(), &x))
+            .collect();
+        let bodys = bodys?;
         let f = UserFunctionDef {
             name: name.clone(),
             from_module: from_module.clone(),
@@ -113,7 +116,7 @@ impl Loading for FunctionDef {
             params: NodeIter::from(params)
                 .map(|x| x.get_sym().unwrap())
                 .collect(),
-            body: bodys.collect(),
+            body: bodys,
         };
         let f = Handle::new(FunctionDef::UserFunction(f));
         Ok(Value::Function(f))
@@ -130,11 +133,12 @@ impl Loading for Expr {
             return Ok(Value::Nil);
         }
         if let Value::Pair(x) = i {
-            x.iter()
+            let r: Result<Vec<Value>, SyntaxMatchError> = x
+                .iter()
                 .map(|x| Expr::loading(parent.clone(), from_module.clone(), &x))
-                .try_fold(Value::Nil, |prev, v| {
-                    Ok(Value::Pair(Handle::new(Node(v?, prev))))
-                })
+                .collect();
+            let r = NodeExtend::from_iter(r?).into_value();
+            Ok(r)
         } else {
             Ok(i.clone())
         }
