@@ -36,7 +36,7 @@ fn match_sym(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult
 	Err(SyntaxMatchError::MatchError)
 }
 
-fn match_list(record: &mut MatchRecord, a: &Value, b: &Value) -> MatchResult {
+fn match_list(_record: &mut MatchRecord, _a: &Value, _b: &Value) -> MatchResult {
     todo!()
 }
 

@@ -1,7 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, iter::FromIterator, sync::RwLock};
+use std::{collections::HashMap, iter::FromIterator, sync::RwLock};
 
 use crate::values::Handle;
-use get_name::GetName;
 use logic_path::get_path;
 
 // use super::symbols::*;

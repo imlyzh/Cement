@@ -9,15 +9,15 @@ pub mod values;
 use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
-use context::*;
+
 use preprocess::symbols::*;
 use preprocess::*;
 use match_template::*;
 use syntax::parser::*;
-use values::*;
+
 
 fn main() -> ! {
-    let modu = Module::new(&Handle::new(Symbol::new("repl-module")), &None);
+    // let modu = Module::new(&Handle::new(Symbol::new("repl-module")), &None);
     loop {
         // read
         stdout().write_all(">>> ".as_bytes()).unwrap();

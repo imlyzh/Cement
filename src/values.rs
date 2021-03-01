@@ -115,7 +115,7 @@ impl std::fmt::Display for Value {
             Value::Str(v) => f.write_str(&v.to_string()),
             Value::Sym(v) => f.write_str(&v.to_string()),
             Value::Pair(v) => v.fmt(f),
-            Value::Vec(v) => todo!("vec fmt"),
+            Value::Vec(_v) => todo!("vec fmt"),
             Value::Function(v) => v.fmt(f),
         }
     }
@@ -197,9 +197,9 @@ impl Into<Value> for NodeExtend {
 }
 
 impl NodeExtend {
-    fn into_nodeiter(self) -> NodeIter {
+    /* fn into_nodeiter(self) -> NodeIter {
         NodeIter::from(self)
-    }
+    } */
 }
 
 impl FromIterator<Value> for NodeExtend {
