@@ -52,7 +52,7 @@ pub struct UserFunctionDef {
     pub from_module: Handle<Module>,
     pub parent: Option<Handle<FunctionDef>>,
     pub constant_table: RwLock<HashMap<Handle<Symbol>, Value>>,
-    pub params: Vec<Handle<Symbol>>,
+    pub params: Vec<Value>,
     pub body: Vec<Value>,
 }
 

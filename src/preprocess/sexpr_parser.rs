@@ -1,4 +1,4 @@
-use crate::values::Symbol;
+use crate::{context::{FunctionDef, MacroDef}, values::Symbol};
 
 use crate::values::{Handle, NodeIter};
 
@@ -14,11 +14,69 @@ pub trait SexprParser {
 	fn sexpr_parse(i: &Value) -> Result<Self::Output, SyntaxMatchError>;
 }
 
-impl SexprParser for Define {
-    type Output = (Handle<Symbol>, Value);
+type List2Result = Result<(Value, Value), SyntaxMatchError>;
+
+fn parse_list2(i: &Value) -> List2Result {
+	let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
+	let r0 = expr_list.car();
+	let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+	let r1 = expr_list.car();
+	expr_list.cdr().get_nil().ok_or(SyntaxMatchError::MatchError)?;
+	Ok((r0, r1))
+}
+
+impl SexprParser for MacroDef {
+    type Output = (Handle<Symbol>, Vec<(Value, Value)>);
 
     fn sexpr_parse(i: &Value) -> Result<Self::Output, SyntaxMatchError> {
         let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
+		{
+			let is_module_sym =
+			expr_list.car().get_sym()
+				.map(|x| *x == Symbol::new("fun"))
+				.ok_or(SyntaxMatchError::MatchError)?;
+			if !is_module_sym {
+				return Err(SyntaxMatchError::MatchError);
+			}
+		}
+		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let name = expr_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
+		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let match_apply_pair: Result<Vec<_>, _> = NodeIter::new(bodys).map(|x|parse_list2(&x)).collect();
+		Ok((name, match_apply_pair?))
+    }
+}
+
+impl SexprParser for FunctionDef {
+    type Output = (Handle<Symbol>, Vec<Value>, Vec<Value>);
+
+    fn sexpr_parse(i: &Value) -> Result<Self::Output, SyntaxMatchError> {
+        let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
+		{
+			let is_module_sym =
+			expr_list.car().get_sym()
+				.map(|x| *x == Symbol::new("fun"))
+				.ok_or(SyntaxMatchError::MatchError)?;
+			if !is_module_sym {
+				return Err(SyntaxMatchError::MatchError);
+			}
+		}
+		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let arg_list = expr_list.car().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let name = arg_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
+		let args = arg_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let args = NodeIter::new(args).collect();
+		let bodys = NodeIter::new(bodys).collect();
+		Ok((name, args, bodys))
+    }
+}
+
+impl SexprParser for Define {
+	type Output = (Handle<Symbol>, Value);
+
+	fn sexpr_parse(i: &Value) -> Result<Self::Output, SyntaxMatchError> {
+		let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
 		{
 			let is_module_sym =
 			expr_list.car().get_sym()
@@ -35,14 +93,14 @@ impl SexprParser for Define {
 		expr_list.cdr().get_nil().ok_or(SyntaxMatchError::MatchError)?;
 		
 		Ok((name, value))
-    }
+	}
 }
 
 impl SexprParser for Module {
 	type Output = (Handle<Symbol>, Vec<Value>);
 
 	fn sexpr_parse(i: &Value) -> Result<Self::Output, SyntaxMatchError> {
-        let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
+		let expr_list = i.get_list().ok_or(SyntaxMatchError::MatchError)?;
 		{
 			let is_module_sym =
 			expr_list.car().get_sym()
@@ -54,9 +112,8 @@ impl SexprParser for Module {
 		}
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let module_name = expr_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
-		let bodys = expr_list.cdr().get_pair()
-		.ok_or(SyntaxMatchError::MatchError)?;
+		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let bodys = NodeIter::new(bodys).collect();
 		Ok((module_name, bodys))
-    }
+	}
 }

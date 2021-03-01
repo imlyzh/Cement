@@ -114,9 +114,7 @@ impl Loading for FunctionDef {
             parent,
             body,
             constant_table: RwLock::new(HashMap::new()),
-            params: NodeIter::from(params)
-                .map(|x| x.get_sym().unwrap())
-                .collect(),
+            params: NodeIter::from(params).collect(),
         };
         let f = Handle::new(FunctionDef::UserFunction(f));
         Ok(Value::Function(f))
