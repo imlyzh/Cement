@@ -231,7 +231,7 @@ impl Loading for Module {
             x.iter().collect()
         });
 
-        let modu = Module::new(name.clone(), Some(from_module.clone()));
+        let modu = Module::new(&name, &Some(from_module.clone()));
         from_module
             .module_table
             .write()

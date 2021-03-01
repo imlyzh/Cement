@@ -5,7 +5,6 @@ use get_name::GetName;
 use logic_path::get_path;
 
 // use super::symbols::*;
-use super::match_template::*;
 use crate::context::*;
 use crate::error::SyntaxMatchError;
 use crate::values::*;
@@ -72,7 +71,9 @@ impl Loading for Define {
         from_module: &Handle<Module>,
         i: &Value,
     ) -> Result<Value, SyntaxMatchError> {
-        todo!()
+		let (name, value) = Define::sexpr_parse(i)?;
+		
+        Ok(Value::Nil)
 	}
 }
 

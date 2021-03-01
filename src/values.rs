@@ -86,6 +86,13 @@ impl Value {
     impl_get_item!(get_pair, Pair, Handle<Node>);
     impl_get_item!(get_vec, Vec, Handle<Vec<Value>>);
     impl_get_item!(get_fun, Function, Handle<FunctionDef>);
+	pub fn get_nil(&self) -> Option<()> {
+		if self.is_nil() {
+			Some(())
+		} else {
+			None
+		}
+	}
 	pub fn get_list(&self) -> Option<Handle<Node>> {
 		if self.is_list() {
 			Some(self.get_pair().unwrap())
