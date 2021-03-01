@@ -9,10 +9,15 @@ pub mod values;
 use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
-use preprocess::match_template::*;
+use context::*;
+use preprocess::symbols::*;
+use preprocess::*;
+use match_template::*;
 use syntax::parser::*;
+use values::*;
 
 fn main() -> ! {
+    let modu = Module::new(&Handle::new(Symbol::new("repl-module")), &None);
     loop {
         // read
         stdout().write_all(">>> ".as_bytes()).unwrap();
@@ -24,12 +29,18 @@ fn main() -> ! {
             continue;
         }
         // parse
-        let temp = repl_parse("(($sym name) ...)").unwrap();
+        let temp = &FUNCTION_DEF_TEMP;
         let res = repl_parse(a).unwrap();
-        let mut mr = MatchRecord::default();
-        match_template(&mut mr, &temp, &res).unwrap();
-        println!("> {:?}", res);
-        println!("match: {:?}", mr);
-        // println!("> {}", res.map_or("error.".to_string(), |v| v.to_string()));
+
+        // let _r = ModuleItem::loading(None, modu.clone(), &res);
+        let mut ctx = MatchRecord::default();
+        match_template(&mut ctx, temp, &res).unwrap();
+        println!("ctx: {}", ctx);
+        // stdout().write_all("query: ".as_bytes()).unwrap();
+        // stdout().flush().unwrap();
+        // let mut query = String::new();
+        // stdin().read_line(&mut query).unwrap();
+        // let query_result = modu.find_name(query.trim());
+        // println!("query result: {:?}", query_result);
     }
 }

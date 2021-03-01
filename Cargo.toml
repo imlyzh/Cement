@@ -5,12 +5,12 @@ authors = ["Lyzh <enterindex@gmail.com>"]
 edition = "2018"
 
 [[bin]]
-name = "cementi"
+name = "c0i"
 path = "src/main.rs"
 
 
 # [lib]
-# name = "cementlib"
+# name = "c0lib"
 # path = "src/lib.rs"
 
 [dependencies]

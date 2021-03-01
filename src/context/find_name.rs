@@ -2,7 +2,7 @@ use crate::values::*;
 
 use super::*;
 
-trait FindName {
+pub trait FindName {
     type Output;
     fn find_name(&self, i: &str) -> Option<Self::Output>;
 }
@@ -11,8 +11,12 @@ impl FindName for Module {
     type Output = Value;
 
     fn find_name(&self, i: &str) -> Option<Self::Output> {
-        i.split('.');
-        todo!()
+        // i.split('.');
+        self.constant_table
+            .read()
+            .unwrap()
+            .get(&Symbol::new(i))
+            .map(Value::clone)
     }
 }
 

@@ -24,7 +24,7 @@ lazy_static! {
         repl_parse("((quote macro) ($sym name) match temp)").unwrap();
     pub static ref MACRO_DEF_TEMP1: Value =
         repl_parse("((quote syntax-rules) ($sym name) [match temp] ...)").unwrap();
-    pub static ref FUNCTION_DEF_TEMP1: Value =
+    pub static ref FUNCTION_DEF_TEMP: Value =
         repl_parse("((quote fun) [($sym name) ($sym params) ...] bodys ...)").unwrap();
-    pub static ref DEFINE_TEMP: Value = repl_parse("((quote define) ($sym name) value").unwrap();
+    pub static ref DEFINE_TEMP: Value = repl_parse("((quote define) ($sym name) value)").unwrap();
 }

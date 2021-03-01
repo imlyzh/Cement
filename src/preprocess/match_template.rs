@@ -12,19 +12,40 @@ pub struct MatchRecord {
     pub extend_maps: RefCell<HashMap<Handle<Symbol>, NodeExtend>>,
 }
 
+impl std::fmt::Display for MatchRecord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "MatchRecord {{ maps: {:?}, extend_maps: {:?} }}",
+            self.maps, self.extend_maps
+        )
+    }
+}
+
+type MatchResult = Result<(), SyntaxMatchError>;
+
+fn match_sym(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult {
+    if let (Value::Sym(id), v) = (temp.clone(), inp.clone()) {
+        record
+            .maps
+            .get_mut()
+            .insert(id.clone(), v)
+            .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(id)))?;
+        return Ok(());
+    }
+	Err(SyntaxMatchError::MatchError)
+}
+
+fn match_list(record: &mut MatchRecord, a: &Value, b: &Value) -> MatchResult {
+    todo!()
+}
+
 pub fn match_template(
     record: &mut MatchRecord,
     temp: &Value,
     inp: &Value,
-) -> Result<(), SyntaxMatchError> {
+) -> MatchResult {
     match (temp.clone(), inp.clone()) {
-        (Value::Sym(id), v) => {
-            record
-                .maps
-                .get_mut()
-                .insert(id.clone(), v)
-                .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(id)))?;
-        }
 
         (Value::Pair(a), Value::Pair(b)) => {
             let a_lst: Vec<Value> = a.iter().collect();

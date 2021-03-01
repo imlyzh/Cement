@@ -1,5 +1,10 @@
 use std::{
-    cell::RefCell, collections::VecDeque, fmt::Display, hash::Hash, iter::FromIterator, sync::Arc,
+    cell::RefCell,
+    collections::VecDeque,
+    fmt::{Debug, Display},
+    hash::Hash,
+    iter::FromIterator,
+    sync::Arc,
 };
 
 use crate::{context::FunctionDef, utils::string_intern};
@@ -22,6 +27,18 @@ pub enum Value {
     Function(Handle<FunctionDef>),
 }
 
+macro_rules! impl_is_type {
+    ($name:ident, $item:ident) => {
+        pub fn $name(&self) -> bool {
+            if let Value::$item(_) = self {
+				true
+            } else {
+                false
+            }
+        }
+    };
+}
+
 macro_rules! impl_get_item {
     ($name:ident, $item:ident, $tp:path) => {
         pub fn $name(&self) -> Option<$tp> {
@@ -35,8 +52,32 @@ macro_rules! impl_get_item {
 }
 
 impl Value {
+	impl_is_type!(is_bool, Bool);
+	impl_is_type!(is_char, Char);
+    impl_is_type!(is_int, Int);
+    impl_is_type!(is_uint, Uint);
+    impl_is_type!(is_float, Float);
+    impl_is_type!(is_str, Str);
+    impl_is_type!(is_sym, Sym);
+    impl_is_type!(is_pair, Pair);
+    impl_is_type!(is_vec, Vec);
+    impl_is_type!(is_fun, Function);
+	pub fn is_nil(&self) -> bool {
+		if let Value::Nil = self {
+			true
+		} else {
+			false
+		}
+	}
+	pub fn is_list(&self) -> bool {
+		self.get_pair()
+		.map_or(false, |x| x.1.is_pair() || x.1.is_nil())
+	}
+}
+
+impl Value {
     impl_get_item!(get_bool, Bool, bool);
-    impl_get_item!(get_char, Char, char);
+	impl_get_item!(get_char, Char, char);
     impl_get_item!(get_int, Int, i64);
     impl_get_item!(get_uint, Uint, u64);
     impl_get_item!(get_float, Float, f64);
@@ -45,9 +86,16 @@ impl Value {
     impl_get_item!(get_pair, Pair, Handle<Node>);
     impl_get_item!(get_vec, Vec, Handle<Vec<Value>>);
     impl_get_item!(get_fun, Function, Handle<FunctionDef>);
+	pub fn get_list(&self) -> Option<Handle<Node>> {
+		if self.is_list() {
+			Some(self.get_pair().unwrap())
+		} else {
+			None
+		}
+	}
 }
 
-/*
+// /*
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -59,13 +107,13 @@ impl std::fmt::Display for Value {
             Value::Float(v) => f.write_str(&v.to_string()),
             Value::Str(v) => f.write_str(&v.to_string()),
             Value::Sym(v) => f.write_str(&v.to_string()),
-            Value::List(v) => v.fmt(f),
+            Value::Pair(v) => v.fmt(f),
             Value::Vec(v) => todo!("vec fmt"),
+            Value::Function(v) => v.fmt(f),
         }
     }
 }
 //  */
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Node(pub Value, pub Value);
 
@@ -138,6 +186,12 @@ impl NodeExtend {
 impl Into<Value> for NodeExtend {
     fn into(self) -> Value {
         self.into_value()
+    }
+}
+
+impl NodeExtend {
+    fn into_nodeiter(self) -> NodeIter {
+        NodeIter::from(self)
     }
 }
 
@@ -240,7 +294,7 @@ impl PartialEq for Symbol {
 
 impl Display for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.id.fmt(f)
+        std::fmt::Display::fmt(&self.id, f)
     }
 }
 
