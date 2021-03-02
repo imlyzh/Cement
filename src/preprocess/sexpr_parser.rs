@@ -33,7 +33,7 @@ impl SexprParser for MacroDef {
 		{
 			let is_module_sym =
 			expr_list.car().get_sym()
-				.map(|x| *x == Symbol::new("fun"))
+				.map(|x| *x == Symbol::new("macro"))
 				.ok_or(SyntaxMatchError::MatchError)?;
 			if !is_module_sym {
 				return Err(SyntaxMatchError::MatchError);
@@ -41,6 +41,9 @@ impl SexprParser for MacroDef {
 		}
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let name = expr_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
+		if expr_list.cdr().is_nil() {
+			return Ok((name, vec![]));
+		}
 		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let match_apply_pair: Result<Vec<_>, _> = NodeIter::new(bodys).map(|x|parse_list2(&x)).collect();
 		Ok((name, match_apply_pair?))
@@ -65,8 +68,11 @@ impl SexprParser for FunctionDef {
 		let arg_list = expr_list.car().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let name = arg_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
 		let args = arg_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
-		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let args = NodeIter::new(args).collect();
+		if expr_list.cdr().is_nil() {
+			return Ok((name, args, vec![]));
+		}
+		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let bodys = NodeIter::new(bodys).collect();
 		Ok((name, args, bodys))
     }
@@ -91,7 +97,6 @@ impl SexprParser for Define {
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let value = expr_list.car();
 		expr_list.cdr().get_nil().ok_or(SyntaxMatchError::MatchError)?;
-		
 		Ok((name, value))
 	}
 }
@@ -112,6 +117,9 @@ impl SexprParser for Module {
 		}
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let module_name = expr_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
+		if expr_list.cdr().is_nil() {
+			return Ok((module_name, vec![]));
+		}
 		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let bodys = NodeIter::new(bodys).collect();
 		Ok((module_name, bodys))

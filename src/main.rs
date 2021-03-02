@@ -10,9 +10,8 @@ use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
 
+use crate::{context::MacroDef, preprocess::sexpr_parser::SexprParser};
 use preprocess::symbols::*;
-use preprocess::*;
-use match_template::*;
 use syntax::parser::*;
 
 
@@ -29,13 +28,17 @@ fn main() -> ! {
             continue;
         }
         // parse
-        let temp = &FUNCTION_DEF_TEMP;
         let res = repl_parse(a).unwrap();
-
-        // let _r = ModuleItem::loading(None, modu.clone(), &res);
-        let mut ctx = MatchRecord::default();
-        match_template(&mut ctx, temp, &res).unwrap();
-        println!("ctx: {}", ctx);
+		println!("res: {}", res);
+		let r = MacroDef::sexpr_parse(&res);
+		match r {
+			Ok((name, pairs)) => {
+				println!("macro name: {:?}; pairs: {:?}", name, pairs);
+			},
+			Err(e) => {
+				println!("exception: {:?}", e);
+			}
+		}
         // stdout().write_all("query: ".as_bytes()).unwrap();
         // stdout().flush().unwrap();
         // let mut query = String::new();
