@@ -10,8 +10,10 @@ use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
 
-use crate::{context::MacroDef, preprocess::sexpr_parser::SexprParser};
-use preprocess::symbols::*;
+use context::*;
+use preprocess::{loading::Define, sexpr_parser::SexprParser};
+// use context::FunctionDef;
+// use preprocess::symbols::*;
 use syntax::parser::*;
 
 
@@ -29,11 +31,11 @@ fn main() -> ! {
         }
         // parse
         let res = repl_parse(a).unwrap();
-		println!("res: {}", res);
-		let r = MacroDef::sexpr_parse(&res);
+		// println!("res: {}", res);
+		let r = Define::sexpr_parse(&res);
 		match r {
-			Ok((name, pairs)) => {
-				println!("macro name: {:?}; pairs: {:?}", name, pairs);
+			Ok((name, value)) => {
+				println!("fun name: {:?}; value: {:?}", name, value);
 			},
 			Err(e) => {
 				println!("exception: {:?}", e);

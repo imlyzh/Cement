@@ -41,12 +41,13 @@ impl SexprParser for MacroDef {
 		}
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let name = expr_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
-		if expr_list.cdr().is_nil() {
-			return Ok((name, vec![]));
-		}
-		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
-		let match_apply_pair: Result<Vec<_>, _> = NodeIter::new(bodys).map(|x|parse_list2(&x)).collect();
-		Ok((name, match_apply_pair?))
+		let bodys = if expr_list.cdr().is_nil() {
+			Ok(vec![])
+		} else {
+			let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+			NodeIter::new(bodys).map(|x|parse_list2(&x)).collect()
+		};
+		Ok((name, bodys?))
     }
 }
 
@@ -67,13 +68,18 @@ impl SexprParser for FunctionDef {
 		let expr_list = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let arg_list = expr_list.car().get_list().ok_or(SyntaxMatchError::MatchError)?;
 		let name = arg_list.car().get_sym().ok_or(SyntaxMatchError::MatchError)?;
-		let args = arg_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
-		let args = NodeIter::new(args).collect();
-		if expr_list.cdr().is_nil() {
-			return Ok((name, args, vec![]));
-		}
-		let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
-		let bodys = NodeIter::new(bodys).collect();
+		let args = if expr_list.cdr().is_nil() {
+			vec![]
+		} else {
+			let args = arg_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+			NodeIter::new(args).collect()
+		};
+		let bodys = if expr_list.cdr().is_nil() {
+			vec![]
+		} else {
+			let bodys = expr_list.cdr().get_list().ok_or(SyntaxMatchError::MatchError)?;
+			NodeIter::new(bodys).collect()
+		};
 		Ok((name, args, bodys))
     }
 }
