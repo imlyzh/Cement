@@ -7,6 +7,7 @@ impl Module {
         Handle::new(Module {
             name: name.clone(),
             parent: parent.clone(),
+			file_path: Handle::new(Symbol::new("prelude")),
             module_table: RwLock::new(HashMap::new()),
             macro_table: RwLock::new(HashMap::new()),
             constant_table: RwLock::new(HashMap::new()),

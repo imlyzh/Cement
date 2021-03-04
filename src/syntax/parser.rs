@@ -1,11 +1,11 @@
-use std::{cell::RefCell, collections::VecDeque};
+use std::{cell::RefCell, collections::VecDeque, fs::File, io::Read, path::Path};
 
 use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::*;
 
-use crate::utils::{escape_str, str2char};
+use crate::{error::CompilerError, utils::{escape_str, str2char}};
 use crate::{utils::string_intern, values::*};
 
 pub type ParseError = Error<Rule>;
@@ -70,10 +70,21 @@ pub fn parse_unit(pair: Pair<Rule>) -> Option<Value> {
     }
 }
 
-pub fn parse(input: &str) -> Result<NodeExtend, ParseError> {
+pub fn parse(input: &str) -> Result<NodeIter, ParseError> {
     let pairs: Pairs<Rule> = Cement::parse(Rule::unit, input)?;
-    let result = pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
-    Ok(result.collect())
+    let result =
+		pairs.flat_map(|x| x.into_inner()).filter_map(parse_unit);
+	let result: NodeExtend = result.collect();
+    Ok(NodeIter::from(result))
+}
+
+pub fn file_parse(path: &Path) -> Result<NodeIter, CompilerError> {
+	let file_path = Handle::new(Symbol::new(path.to_str().unwrap()));
+	let mut f = File::open(path)
+		.or(Err(CompilerError::FileOpenError(file_path.clone())))?;
+	let mut buf = String::new();
+	f.read_to_string(&mut buf).or(Err(CompilerError::FileOpenError(file_path)))?;
+	parse(&buf).map_err(CompilerError::ParseError)
 }
 
 pub fn repl_parse(input: &str) -> Result<Value, ParseError> {

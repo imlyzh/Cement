@@ -4,7 +4,7 @@ use get_name::GetName;
 use logic_path::get_path;
 
 use super::symbols::*;
-use crate::context::*;
+use crate::{context::*, error::CompilerError};
 use crate::error::SyntaxMatchError;
 use crate::values::*;
 
@@ -19,7 +19,7 @@ pub trait Loading {
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError>;
+    ) -> Result<Value, CompilerError>;
 }
 
 impl Loading for MacroDef {
@@ -27,7 +27,7 @@ impl Loading for MacroDef {
         _: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         let mut ctx = MatchRecord::default();
         if match_template(&mut ctx, &USE_MATCH_TEMP1, i).is_ok() {
             let name = ctx
@@ -80,7 +80,7 @@ impl Loading for FunctionDef {
         parent: Option<Handle<Self>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         let mut ctx = MatchRecord::default();
         match_template(&mut ctx, &FUNCTION_DEF_TEMP, i)?;
         let name = ctx
@@ -104,7 +104,7 @@ impl Loading for FunctionDef {
             .get(&BODYS_SYM.clone())
             .unwrap()
             .clone();
-        let bodys: Result<Vec<Value>, SyntaxMatchError> = NodeIter::from(bodys)
+        let bodys: Result<Vec<Value>, _> = NodeIter::from(bodys)
             .map(|x| Expr::loading(parent.clone(), from_module.clone(), &x))
             .collect();
         let body = bodys?;
@@ -126,12 +126,12 @@ impl Loading for Expr {
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         if let Ok(x) = FunctionDef::loading(parent.clone(), from_module.clone(), i) {
             return Ok(x);
         }
         if let Value::Pair(x) = i {
-            let r: Result<Vec<Value>, SyntaxMatchError> = x
+            let r: Result<Vec<Value>, _> = x
                 .iter()
                 .map(|x| Expr::loading(parent.clone(), from_module.clone(), &x))
                 .collect();
@@ -148,7 +148,7 @@ impl Loading for Define {
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         let mut ctx = MatchRecord::default();
         match_template(&mut ctx, &DEFINE_TEMP, i)?;
         let name = ctx
@@ -191,7 +191,7 @@ impl Loading for ModuleItem {
         parent: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         if Define::loading(parent.clone(), from_module.clone(), i).is_ok()
             || MacroDef::loading(parent, from_module, i).is_ok()
         {
@@ -207,7 +207,7 @@ impl Loading for Module {
         _: Option<Handle<FunctionDef>>,
         from_module: Handle<Module>,
         i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
+    ) -> Result<Value, CompilerError> {
         let mut ctx = MatchRecord::default();
         match_template(&mut ctx, &MODULE_MATCH_TEMP, i)?;
         let name = ctx

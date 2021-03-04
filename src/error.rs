@@ -8,9 +8,6 @@ pub enum SyntaxMatchError {
 	SyntaxRuleIsNotExist,
     ExtendInMiddleError(Handle<Symbol>),
     RepeatedSymbol(Handle<Symbol>),
-    RepeatedModule(Handle<Symbol>),
-    RepeatedMacro(Handle<Symbol>),
-    RepeatedFunction(Handle<Symbol>),
     SExprTypeCheckError(Handle<Symbol>),
     SyntaxMatchError(Handle<Symbol>),
 }
@@ -19,6 +16,10 @@ pub enum SyntaxMatchError {
 pub enum CompilerError {
     ParseError(ParseError),
     SyntaxMatchError(SyntaxMatchError),
+	RepeatedModule(Handle<Symbol>),
+    RepeatedMacro(Handle<Symbol>),
+	RepeatedFunction(Handle<Symbol>),
+	FileOpenError(Handle<Symbol>),
 }
 
 #[derive(Debug)]

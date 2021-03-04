@@ -5,11 +5,7 @@ pub mod get_name;
 pub mod logic_path;
 pub mod partial_eq;
 
-use std::{
-    cell::RefCell,
-    collections::{HashMap, LinkedList},
-    sync::{Mutex, RwLock},
-};
+use std::{cell::RefCell, collections::{HashMap, LinkedList}, sync::{Mutex, RwLock}};
 
 use crate::values::{Handle, Symbol, Value};
 use crate::{error::RuntimeError, preprocess::symbols::*};
@@ -68,6 +64,7 @@ pub struct NativeFunctionDef {
 #[derive(Debug)]
 pub struct Module {
     pub name: Handle<Symbol>,
+	pub file_path: Handle<Symbol>,
     pub parent: Option<Handle<Module>>,
     pub module_table: RwLock<HashMap<Handle<Symbol>, Handle<Module>>>,
     pub macro_table: RwLock<HashMap<Handle<Symbol>, Handle<MacroDef>>>,
