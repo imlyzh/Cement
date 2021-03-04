@@ -31,7 +31,7 @@ macro_rules! impl_is_type {
     ($name:ident, $item:ident) => {
         pub fn $name(&self) -> bool {
             if let Value::$item(_) = self {
-				true
+                true
             } else {
                 false
             }
@@ -52,8 +52,8 @@ macro_rules! impl_get_item {
 }
 
 impl Value {
-	impl_is_type!(is_bool, Bool);
-	impl_is_type!(is_char, Char);
+    impl_is_type!(is_bool, Bool);
+    impl_is_type!(is_char, Char);
     impl_is_type!(is_int, Int);
     impl_is_type!(is_uint, Uint);
     impl_is_type!(is_float, Float);
@@ -62,22 +62,22 @@ impl Value {
     impl_is_type!(is_pair, Pair);
     impl_is_type!(is_vec, Vec);
     impl_is_type!(is_fun, Function);
-	pub fn is_nil(&self) -> bool {
-		if let Value::Nil = self {
-			true
-		} else {
-			false
-		}
-	}
-	pub fn is_list(&self) -> bool {
-		self.get_pair()
-		.map_or(false, |x| x.1.is_pair() || x.1.is_nil())
-	}
+    pub fn is_nil(&self) -> bool {
+        if let Value::Nil = self {
+            true
+        } else {
+            false
+        }
+    }
+    pub fn is_list(&self) -> bool {
+        self.get_pair()
+            .map_or(false, |x| x.1.is_pair() || x.1.is_nil())
+    }
 }
 
 impl Value {
     impl_get_item!(get_bool, Bool, bool);
-	impl_get_item!(get_char, Char, char);
+    impl_get_item!(get_char, Char, char);
     impl_get_item!(get_int, Int, i64);
     impl_get_item!(get_uint, Uint, u64);
     impl_get_item!(get_float, Float, f64);
@@ -86,20 +86,20 @@ impl Value {
     impl_get_item!(get_pair, Pair, Handle<Node>);
     impl_get_item!(get_vec, Vec, Handle<Vec<Value>>);
     impl_get_item!(get_fun, Function, Handle<FunctionDef>);
-	pub fn get_nil(&self) -> Option<()> {
-		if self.is_nil() {
-			Some(())
-		} else {
-			None
-		}
-	}
-	pub fn get_list(&self) -> Option<Handle<Node>> {
-		if self.is_list() {
-			Some(self.get_pair().unwrap())
-		} else {
-			None
-		}
-	}
+    pub fn get_nil(&self) -> Option<()> {
+        if self.is_nil() {
+            Some(())
+        } else {
+            None
+        }
+    }
+    pub fn get_list(&self) -> Option<Handle<Node>> {
+        if self.is_list() {
+            Some(self.get_pair().unwrap())
+        } else {
+            None
+        }
+    }
 }
 
 // /*

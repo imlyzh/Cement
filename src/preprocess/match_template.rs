@@ -24,7 +24,7 @@ impl std::fmt::Display for MatchRecord {
 
 type MatchResult = Result<(), SyntaxMatchError>;
 
-fn match_sym(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult {
+fn _match_sym(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult {
     if let (Value::Sym(id), v) = (temp.clone(), inp.clone()) {
         record
             .maps
@@ -33,20 +33,15 @@ fn match_sym(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult
             .map_or(Ok(()), |_| Err(SyntaxMatchError::RepeatedSymbol(id)))?;
         return Ok(());
     }
-	Err(SyntaxMatchError::MatchError)
+    Err(SyntaxMatchError::MatchError)
 }
 
-fn match_list(_record: &mut MatchRecord, _a: &Value, _b: &Value) -> MatchResult {
+fn _match_list(_record: &mut MatchRecord, _a: &Value, _b: &Value) -> MatchResult {
     todo!()
 }
 
-pub fn match_template(
-    record: &mut MatchRecord,
-    temp: &Value,
-    inp: &Value,
-) -> MatchResult {
+pub fn match_template(record: &mut MatchRecord, temp: &Value, inp: &Value) -> MatchResult {
     match (temp.clone(), inp.clone()) {
-
         (Value::Pair(a), Value::Pair(b)) => {
             let a_lst: Vec<Value> = a.iter().collect();
             let b_lst: Vec<Value> = b.iter().collect();

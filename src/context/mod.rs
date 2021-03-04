@@ -1,6 +1,6 @@
 pub mod default;
 pub mod display;
-pub mod find_name;
+pub mod find_symbol;
 pub mod get_name;
 pub mod logic_path;
 pub mod partial_eq;
@@ -8,17 +8,15 @@ pub mod partial_eq;
 use std::{
     cell::RefCell,
     collections::{HashMap, LinkedList},
-    sync::RwLock,
+    sync::{Mutex, RwLock},
 };
 
-use crate::preprocess::symbols::*;
 use crate::values::{Handle, Symbol, Value};
+use crate::{error::RuntimeError, preprocess::symbols::*};
 
-#[derive(Debug)]
-pub struct RuntimeError();
-
-#[derive(Debug)]
-pub struct CResult(pub Result<Value, RuntimeError>);
+// #[derive(Debug)]
+// pub struct CResult(pub Result<Value, RuntimeError>);
+pub type CResult = Result<Value, RuntimeError>;
 
 #[derive(Debug, PartialEq)]
 pub enum MacroDef {
@@ -78,7 +76,7 @@ pub struct Module {
 
 #[derive(Debug, Default)]
 pub struct EnvContext {
-    pub module_table: HashMap<Handle<Symbol>, Handle<Module>>,
+    pub module_table: Mutex<HashMap<Handle<Symbol>, Handle<Module>>>,
 }
 
 #[derive(Debug, Default)]

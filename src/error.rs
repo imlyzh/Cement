@@ -5,16 +5,26 @@ use crate::{syntax::parser::ParseError, values::Handle};
 pub enum SyntaxMatchError {
     MatchError,
     MatchListSizeError,
+	SyntaxRuleIsNotExist,
     ExtendInMiddleError(Handle<Symbol>),
     RepeatedSymbol(Handle<Symbol>),
     RepeatedModule(Handle<Symbol>),
     RepeatedMacro(Handle<Symbol>),
     RepeatedFunction(Handle<Symbol>),
     SExprTypeCheckError(Handle<Symbol>),
+    SyntaxMatchError(Handle<Symbol>),
 }
 
 #[derive(Debug)]
 pub enum CompilerError {
     ParseError(ParseError),
     SyntaxMatchError(SyntaxMatchError),
+}
+
+#[derive(Debug)]
+pub enum RuntimeError {
+    SymbolNotFound(Symbol),
+    SyntaxError(SyntaxMatchError),
+    FrameStackIsEmpty,
+    ModuleIsNotValue,
 }

@@ -9,13 +9,11 @@ pub mod values;
 use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;
 
-
-use context::*;
+// use context::*;
 use preprocess::{loading::Define, sexpr_parser::SexprParser};
 // use context::FunctionDef;
 // use preprocess::symbols::*;
 use syntax::parser::*;
-
 
 fn main() -> ! {
     // let modu = Module::new(&Handle::new(Symbol::new("repl-module")), &None);
@@ -31,16 +29,16 @@ fn main() -> ! {
         }
         // parse
         let res = repl_parse(a).unwrap();
-		// println!("res: {}", res);
-		let r = Define::sexpr_parse(&res);
-		match r {
-			Ok((name, value)) => {
-				println!("fun name: {:?}; value: {:?}", name, value);
-			},
-			Err(e) => {
-				println!("exception: {:?}", e);
-			}
-		}
+        // println!("res: {}", res);
+        let r = Define::sexpr_parse(&res);
+        match r {
+            Ok((name, value)) => {
+                println!("fun name: {:?}; value: {:?}", name, value);
+            }
+            Err(e) => {
+                println!("exception: {:?}", e);
+            }
+        }
         // stdout().write_all("query: ".as_bytes()).unwrap();
         // stdout().flush().unwrap();
         // let mut query = String::new();
