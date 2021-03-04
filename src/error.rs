@@ -28,4 +28,6 @@ pub enum RuntimeError {
     SyntaxError(SyntaxMatchError),
     FrameStackIsEmpty,
     ModuleIsNotValue,
+	FunctionCallIsEmpty,
+	CalleeIsNotCallable
 }

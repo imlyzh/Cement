@@ -10,6 +10,16 @@ lazy_static! {
         Mutex::new(HashMap::new());
 }
 
+// fast(xD
+#[macro_export]
+macro_rules! fast_return {
+	($e:expr) => {
+		if let Ok(res) = $e {
+			return Ok(res);
+		}
+	};
+}
+
 #[inline]
 pub fn string_intern(i: &str) -> Handle<String> {
     let k = Handle::new(i.to_string());

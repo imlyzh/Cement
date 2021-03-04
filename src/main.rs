@@ -1,10 +1,12 @@
-pub mod context;
+#[macro_use]
+pub mod utils;
 pub mod error;
+pub mod values;
+pub mod syntax;
+pub mod context;
 pub mod evalution;
 pub mod preprocess;
-pub mod syntax;
-pub mod utils;
-pub mod values;
+
 
 use std::io::{stdin, stdout, Write};
 // use evalution::context::ThreadContext;

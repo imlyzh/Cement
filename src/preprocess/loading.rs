@@ -177,7 +177,7 @@ fn loading_module(from: &Handle<Module>, path: &Path) -> Result<Handle<Module>, 
 	unimplemented!()
 }
 
-pub fn loading_package(env: &EnvContext, path: &Path) -> Result<(), CompilerError> {
+pub fn loading_user_package(env: &EnvContext, path: &Path) -> Result<(), CompilerError> {
 	let mut mg = env.module_table.lock().unwrap();
 	let from = mg.get(&Symbol::new("built-in")).unwrap();
 	let modu = loading_module(from, path)?;
@@ -185,25 +185,4 @@ pub fn loading_package(env: &EnvContext, path: &Path) -> Result<(), CompilerErro
 	mg.insert(name.clone(), modu)
 		.map_or(Err(CompilerError::RepeatedModule(name)), |_|Ok(()))
 }
-
-/* impl Loading for Module {
-    fn loading(
-        _: &Option<Handle<FunctionDef>>,
-        from_module: &Handle<Module>,
-        i: &Value,
-    ) -> Result<Value, SyntaxMatchError> {
-        let (modu_name, bodys) = Module::sexpr_parse(i)?;
-        let module = Module::new(&modu_name, &Some(from_module.clone()));
-        for i in bodys {
-            ModuleItem::loading(&None, &module, &i)?;
-        }
-        from_module
-            .module_table
-            .write()
-            .unwrap()
-            .insert(modu_name.clone(), module)
-            .ok_or(SyntaxMatchError::RepeatedModule(modu_name))?;
-        Ok(Value::Nil)
-    }
-} */
 

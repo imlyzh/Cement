@@ -2,6 +2,7 @@ use crate::context::find_symbol::*;
 use crate::context::*;
 use crate::error::*;
 use crate::values::*;
+use super::funcall::*;
 
 pub trait Evalable {
     fn eval(&self, env: &mut ThreadContext) -> CResult;
@@ -19,21 +20,28 @@ impl Evalable for Value {
 
 type Expr = Handle<Node>;
 
-// fast(xD
-macro_rules! fast_return {
-	($e:expr) => {
-		if let Ok(res) = $e {
-			return Ok(res);
-		}
-	};
-}
-
 impl Evalable for Expr {
     fn eval(&self, env: &mut ThreadContext) -> CResult {
-        fast_return!(quote_eval(env, self));
+        crate::fast_return!(quote_eval(env, self));
 		// todo!()
-		Err(RuntimeError::SyntaxError(SyntaxMatchError::SyntaxRuleIsNotExist))
+		funcall_eval(env, self)
     }
+}
+
+
+fn funcall_eval(env: &mut ThreadContext, expr: &Expr) -> CResult {
+	if expr.len() == 0 {
+		return Err(RuntimeError::FunctionCallIsEmpty);
+	}
+	let mut expr_result = vec![];
+	for i in expr.iter() {
+		let r = i.eval(env)?;
+		expr_result.push(r);
+	}
+	let fun = expr_result.get(0).unwrap();
+	let r = fun.get_fun()
+		.map_or(Err(RuntimeError::CalleeIsNotCallable), Ok)?;
+	r.call(env, &expr_result[1..])
 }
 
 fn quote_eval(_env: &mut ThreadContext, expr: &Expr) -> CResult {
