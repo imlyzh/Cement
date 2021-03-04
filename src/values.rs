@@ -63,11 +63,7 @@ impl Value {
     impl_is_type!(is_vec, Vec);
     impl_is_type!(is_fun, Function);
     pub fn is_nil(&self) -> bool {
-        if let Value::Nil = self {
-            true
-        } else {
-            false
-        }
+		matches!(self, Value::Nil)
     }
     pub fn is_list(&self) -> bool {
         self.get_pair()
@@ -87,11 +83,7 @@ impl Value {
     impl_get_item!(get_vec, Vec, Handle<Vec<Value>>);
     impl_get_item!(get_fun, Function, Handle<FunctionDef>);
     pub fn get_nil(&self) -> Option<()> {
-        if self.is_nil() {
-            Some(())
-        } else {
-            None
-        }
+        if self.is_nil() { Some(()) } else { None }
     }
     pub fn get_list(&self) -> Option<Handle<Node>> {
         if self.is_list() {

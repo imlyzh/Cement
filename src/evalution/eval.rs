@@ -32,7 +32,7 @@ impl Evalable for Expr {
     fn eval(&self, env: &mut ThreadContext) -> CResult {
         fast_return!(quote_eval(env, self));
 		// todo!()
-		return Err(RuntimeError::SyntaxError(SyntaxMatchError::SyntaxRuleIsNotExist));
+		Err(RuntimeError::SyntaxError(SyntaxMatchError::SyntaxRuleIsNotExist))
     }
 }
 

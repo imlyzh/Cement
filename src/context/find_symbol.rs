@@ -38,7 +38,7 @@ impl FindPath for Module {
                 .map_or(Err(RuntimeError::SymbolNotFound(id.clone())), |x| {
                     Ok(x.clone())
                 })?;
-            return Ok(r.clone());
+            return Ok(r);
         }
         let rg = self.module_table.read().unwrap();
         let module = rg
