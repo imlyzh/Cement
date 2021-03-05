@@ -1,11 +1,4 @@
-use std::{
-    cell::RefCell,
-    collections::VecDeque,
-    fmt::{Debug, Display},
-    hash::Hash,
-    iter::FromIterator,
-    sync::Arc,
-};
+use std::{cell::RefCell, collections::{HashMap, VecDeque}, fmt::{Debug, Display}, hash::Hash, iter::FromIterator, sync::Arc};
 
 use crate::{context::FunctionDef, utils::string_intern};
 
@@ -24,8 +17,12 @@ pub enum Value {
     // List(Handle<List>),
     Pair(Handle<Node>),
     Vec(Handle<Vec<Value>>),
+	Record(Handle<Record>),
     Function(Handle<FunctionDef>),
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Record (pub HashMap<Handle<Symbol>, Value>);
 
 macro_rules! impl_is_type {
     ($name:ident, $item:ident) => {
@@ -109,6 +106,7 @@ impl std::fmt::Display for Value {
             Value::Pair(v) => v.fmt(f),
             Value::Vec(_v) => todo!("vec fmt"),
             Value::Function(v) => v.fmt(f),
+            Value::Record(v) => v.fmt(f)
         }
     }
 }

@@ -39,6 +39,7 @@ impl LogicPath for FunctionDef {
         match self {
             FunctionDef::UserFunction(x) => x.logic_path(),
             FunctionDef::NativeFunction(x) => x.logic_path(),
+            FunctionDef::Closure(_, x) => x.logic_path(),
         }
     }
 }

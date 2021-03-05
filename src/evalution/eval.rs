@@ -1,6 +1,7 @@
 use crate::context::find_symbol::*;
 use crate::context::*;
 use crate::error::*;
+use crate::utils::*;
 use crate::values::*;
 use super::funcall::*;
 
@@ -23,11 +24,36 @@ type Expr = Handle<Node>;
 impl Evalable for Expr {
     fn eval(&self, env: &mut ThreadContext) -> CResult {
         crate::fast_return!(quote_eval(env, self));
+		crate::fast_return!(ifelse_eval(env, self));
 		// todo!()
 		funcall_eval(env, self)
     }
 }
 
+fn ifelse_eval(env: &mut ThreadContext, expr: &Expr) -> CResult {
+	let keyword = expr
+        .car()
+        .get_sym()
+        .ok_or(RuntimeError::SyntaxError(SyntaxMatchError::MatchError))?;
+    {
+        if *keyword == Symbol::new("if") {
+            return Err(match_error(&keyword));
+        }
+    }
+	let expr = expr.cdr().get_list().ok_or(match_error(&keyword))?;
+    let cond = expr.car();
+	let expr = expr.cdr().get_list().ok_or(match_error(&keyword))?;
+	let fork0 = expr.car();
+	let expr = expr.cdr().get_list().ok_or(match_error(&keyword))?;
+	let fork1 = expr.car();
+	expr.cdr().get_nil().ok_or(match_error(&keyword))?;
+	let cond = cond.eval(env)?;
+	let cond = cond
+		.get_bool()
+		.ok_or(RuntimeError::CondIsNotBoolean(keyword))?;
+	let fork = if cond { fork0 } else { fork1 };
+	fork.eval(env)
+}
 
 fn funcall_eval(env: &mut ThreadContext, expr: &Expr) -> CResult {
 	if expr.len() == 0 {
@@ -51,19 +77,11 @@ fn quote_eval(_env: &mut ThreadContext, expr: &Expr) -> CResult {
         .ok_or(RuntimeError::SyntaxError(SyntaxMatchError::MatchError))?;
     {
         if *keyword == Symbol::new("quote") {
-            return Err(RuntimeError::SyntaxError(
-                SyntaxMatchError::SyntaxMatchError(keyword),
-            ));
+            return Err(match_error(&keyword));
         }
     }
-    let expr = expr
-        .cdr()
-        .get_list()
-        .ok_or(RuntimeError::SyntaxError(
-			SyntaxMatchError::SyntaxMatchError(keyword.clone())))?;
-    let value = expr.cdr();
-    expr.cdr()
-        .get_nil()
-        .ok_or(RuntimeError::SyntaxError(SyntaxMatchError::SyntaxMatchError(keyword)))?;
+    let expr = expr.cdr().get_list().ok_or(match_error(&keyword))?;
+    let value = expr.car();
+    expr.cdr().get_nil().ok_or(match_error(&keyword))?;
     Ok(value)
 }

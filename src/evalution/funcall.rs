@@ -11,7 +11,8 @@ impl Callable for FunctionDef {
     fn call(&self, ctx: &ThreadContext, args: &[Value]) -> CResult {
         match self {
             FunctionDef::UserFunction(x) => x.call(ctx, args),
-            FunctionDef::NativeFunction(x) => x.call(ctx, args)
+            FunctionDef::NativeFunction(x) => x.call(ctx, args),
+            FunctionDef::Closure(_, _) => unimplemented!()
         }
     }
 }

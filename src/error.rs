@@ -26,8 +26,9 @@ pub enum CompilerError {
 pub enum RuntimeError {
     SymbolNotFound(Symbol),
     SyntaxError(SyntaxMatchError),
+	CondIsNotBoolean(Handle<Symbol>),
     FrameStackIsEmpty,
     ModuleIsNotValue,
 	FunctionCallIsEmpty,
-	CalleeIsNotCallable
+	CalleeIsNotCallable,
 }

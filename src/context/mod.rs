@@ -7,7 +7,7 @@ pub mod partial_eq;
 
 use std::{cell::RefCell, collections::{HashMap, LinkedList}, sync::{Mutex, RwLock}};
 
-use crate::values::{Handle, Symbol, Value};
+use crate::values::{Handle, Symbol, Value, Record};
 use crate::{error::RuntimeError, preprocess::symbols::*};
 
 // #[derive(Debug)]
@@ -38,6 +38,7 @@ pub struct ProcessMacro {
 pub enum FunctionDef {
     UserFunction(UserFunctionDef),
     NativeFunction(NativeFunctionDef),
+	Closure(Handle<Record>, Handle<FunctionDef>),
 }
 
 #[derive(Debug)]

@@ -34,6 +34,7 @@ impl GetName for FunctionDef {
         match self {
             FunctionDef::UserFunction(x) => x.get_name(),
             FunctionDef::NativeFunction(x) => x.get_name(),
+            FunctionDef::Closure(_, x) => x.get_name(),
         }
     }
 }
