@@ -11,7 +11,7 @@ pub enum Type {
     String,
     Symbol,
     Vector(Box<Type>),
-    Pair(Box<(Type, Type)>),
+    Pair(Box<Type>, Box<Type>),
     List(Box<Type>),
     Callable(CallableType),
     Union(Vec<Type>),

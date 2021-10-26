@@ -42,11 +42,4 @@ pub struct Lets(pub Vec<(Symbol, Ast)>, pub Box<Ast>);
 // args Pattern
 
 #[derive(Debug, Clone)]
-pub struct Pair<T>(pub Box<T>, pub Pattern<T>);
-
-#[derive(Debug, Clone)]
-pub enum Pattern<T> {
-    Ignore,
-    Const(Constant),
-    Pair(Box<Pair<T>>),
-}
+pub struct Pair<T>(pub Box<T>, pub Option<Box<T>>);

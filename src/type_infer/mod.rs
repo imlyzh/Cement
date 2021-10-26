@@ -1,10 +1,10 @@
 pub mod types;
 
-use std::{collections::HashSet, sync::Arc};
+use std::sync::Arc;
 
 use sexpr_ir::gast::constant::Constant;
 
-use crate::{ast::{Ast, Call, Cond, Lets, callable::{Callable, Lambda}}, env::Env};
+use crate::{ast::{Ast, Call, Cond, Lets, Pair, callable::{Callable, Lambda, Pattern}}, env::Env};
 
 use self::types::Type;
 
@@ -78,8 +78,36 @@ impl TypeInfer for Lambda {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         let Lambda(params, body) = self;
         let env = Arc::new(env.new_level());
-        body.type_infer(env);
+        let func_types = params;
+        let return_type = body.type_infer(env);
+        // let (r, ext) = params.items();
+
         todo!()
+    }
+}
+
+impl TypeInfer for Pattern {
+    fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
+        match self {
+            Pattern::Ignore => Type::Any,
+            Pattern::Const(c) => c.type_infer(env),
+            Pattern::Var(s) => {
+                env.add(s.clone(), Type::Any);
+                Type::Any
+            },
+            Pattern::Pair(p) => p.type_infer(env),
+        }
+    }
+}
+
+impl TypeInfer for Pair<Pattern> {
+    fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
+        let Pair(car, cdr) = self;
+        let car = Box::new(car.type_infer(env.clone()));
+        let cdr = Box::new(cdr.as_ref()
+            .map(|x| x.type_infer(env))
+            .unwrap_or(Type::Nil));
+        Type::Pair(car, cdr)
     }
 }
 
