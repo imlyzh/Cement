@@ -1,23 +1,21 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::{Arc, RwLock}};
 
 use sexpr_ir::gast::symbol::Symbol;
 
 
 #[derive(Debug, Clone, Default)]
-pub struct Env<T>(pub HashMap<Symbol, T>, Option<Arc<Env<T>>>);
+pub struct Env<T>(pub Arc<RwLock<HashMap<Symbol, T>>>, Option<Arc<Env<T>>>);
 
-impl<T> Env<T> {
-    pub fn get_item(&self, k: &Symbol) -> Option<&T> {
-        if let Some(x) = self.0.get(k) {
-            Some(x)
+impl<T: Clone> Env<T> {
+    pub fn get_item(&self, k: &Symbol) -> Option<T> {
+        if let Some(x) = self.0.read().unwrap().get(k) {
+            Some((*x).clone())
         } else {
             self.1.as_ref().and_then(|x| x.get_item(k))
         }
     }
-    pub fn add(self, k: Symbol, v: T) -> Self {
-        let Env(mut map, f) = self;
-        map.insert(k, v);
-        Self(map, f)
+    pub fn add(&self, k: Symbol, v: T) {
+        self.0.write().unwrap().insert(k, v);
     }
     pub fn new_level(self: Arc<Self>) -> Self {
         Self(Default::default(), Some(self))

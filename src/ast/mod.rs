@@ -21,12 +21,23 @@ pub enum Ast {
     Var(Symbol),
     Const(Constant),
     // If(Box<Ast>, Box<Ast>, Box<Ast>),
-    Cond(Vec<(Ast, Ast)>, Option<Box<Ast>>),
-    Lets(Vec<(Symbol, Ast)>, Box<Ast>),
+    Cond(Cond),
+    Lets(Lets),
     Begin(Vec<Ast>),
     Lambda(Box<Callable>),
-    Call(Box<Ast>, Pair<Ast>),
+    Call(Call),
 }
+
+
+#[derive(Debug, Clone)]
+pub struct Call(pub Box<Ast>, pub Pair<Ast>);
+
+#[derive(Debug, Clone)]
+pub struct Cond(pub Vec<(Ast, Ast)>, pub Option<Box<Ast>>);
+
+#[derive(Debug, Clone)]
+pub struct Lets(pub Vec<(Symbol, Ast)>, pub Box<Ast>);
+
 
 // args Pattern
 

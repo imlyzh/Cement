@@ -13,7 +13,7 @@ pub enum Type {
     Vector(Box<Type>),
     Pair(Box<(Type, Type)>),
     List(Box<Type>),
-    Callable(),
+    Callable(CallableType),
     Union(Vec<Type>),
     Any,
 }
