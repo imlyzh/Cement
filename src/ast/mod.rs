@@ -22,7 +22,7 @@ pub enum Ast {
     Const(Constant),
     // If(Box<Ast>, Box<Ast>, Box<Ast>),
     Cond(Vec<(Ast, Ast)>, Option<Box<Ast>>),
-    Let(Vec<(Symbol, Ast)>, Box<Ast>),
+    Lets(Vec<(Symbol, Ast)>, Box<Ast>),
     Begin(Vec<Ast>),
     Lambda(Box<Callable>),
     Call(Box<Ast>, Pair<Ast>),
