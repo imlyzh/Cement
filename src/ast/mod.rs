@@ -28,9 +28,15 @@ pub enum Ast {
     Call(Call),
 }
 
+#[derive(Debug, Clone)]
+pub struct Call(pub Box<Ast>, pub Pair<Params>);
 
 #[derive(Debug, Clone)]
-pub struct Call(pub Box<Ast>, pub Pair<Ast>);
+pub enum Params {
+    Value(Ast),
+    Pair(Pair<Params>),
+}
+
 
 #[derive(Debug, Clone)]
 pub struct Cond(pub Vec<(Ast, Ast)>, pub Option<Box<Ast>>);

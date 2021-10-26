@@ -4,9 +4,9 @@ use std::sync::Arc;
 
 use sexpr_ir::gast::constant::Constant;
 
-use crate::{ast::{Ast, Call, Cond, Lets, Pair, callable::{Callable, Lambda, Pattern}}, env::Env};
+use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params, callable::{Callable, Lambda, Pattern}}, env::Env};
 
-use self::types::Type;
+use self::types::{CallableType, Type};
 
 
 
@@ -60,8 +60,19 @@ impl TypeInfer for Lets {
 impl TypeInfer for Call {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         let Call(callee, params) = self;
-        let funtype = callee.type_infer(env);
+        let funtype = callee.type_infer(env.clone());
+        let paramstype = params.type_infer(env);
+        // check if callee is a function
         todo!()
+    }
+}
+
+impl TypeInfer for Params {
+    fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
+        match self {
+            Params::Value(v) => v.type_infer(env),
+            Params::Pair(p) => p.type_infer(env),
+        }
     }
 }
 
@@ -78,11 +89,9 @@ impl TypeInfer for Lambda {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         let Lambda(params, body) = self;
         let env = Arc::new(env.new_level());
-        let func_types = params;
-        let return_type = body.type_infer(env);
-        // let (r, ext) = params.items();
-
-        todo!()
+        let return_type = Box::new(body.type_infer(env.clone()));
+        let args_type = Box::new(params.type_infer(env));
+        Type::Callable(CallableType(args_type, return_type))
     }
 }
 
@@ -100,7 +109,7 @@ impl TypeInfer for Pattern {
     }
 }
 
-impl TypeInfer for Pair<Pattern> {
+impl<T: TypeInfer> TypeInfer for Pair<T> {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         let Pair(car, cdr) = self;
         let car = Box::new(car.type_infer(env.clone()));
