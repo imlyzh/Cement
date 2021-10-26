@@ -15,10 +15,11 @@ pub struct Lambda(pub Pair<Symbol>, pub Ast);
 
 
 #[derive(Debug, Clone)]
-pub enum NativeInterface {
-    Rust(RNI),
-    C(CNI),
+pub struct NativeInterface {
+    pub ptr: RNI,
+    is_pure: bool,
+    // type_annotation
 }
 
 type RNI = ();
-type CNI = ();
+// type CNI = ();

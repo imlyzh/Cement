@@ -18,6 +18,8 @@ pub struct FunctionDef(pub Symbol, pub Lambda);
 
 #[derive(Debug, Clone)]
 pub enum Ast {
+    Var(Symbol),
+    Const(Constant),
     // If(Box<Ast>, Box<Ast>, Box<Ast>),
     Cond(Vec<(Ast, Ast)>, Option<Box<Ast>>),
     Let(Vec<(Symbol, Ast)>, Box<Ast>),
