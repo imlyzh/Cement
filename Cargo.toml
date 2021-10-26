@@ -18,3 +18,5 @@ pest = "2.1.3"
 pest_derive = "2.1.0"
 lazy_static = "1.4.0"
 multimap = "0.8.2"
+
+sexpr_ir = "^0.5.*"
