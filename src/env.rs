@@ -1,6 +1,8 @@
-use std::{collections::HashMap, sync::{Arc, RwLock}};
+use std::{cell::RefCell, collections::HashMap, sync::{Arc, RwLock}};
 
 use sexpr_ir::gast::symbol::Symbol;
+
+use crate::{ast::{FunctionDef, callable::Lambda}, type_infer::types::{CallableType, Type}};
 
 
 #[derive(Debug, Clone, Default)]

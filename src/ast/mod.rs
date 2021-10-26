@@ -1,9 +1,12 @@
 pub mod callable;
 pub mod macrodef;
 
+use std::sync::Arc;
+
 use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
-use self::{callable::{Callable, Lambda}, macrodef::Macro};
+use self::{callable::Lambda, macrodef::Macro};
+use super::runtime::value::Value;
 
 
 #[derive(Debug, Clone)]
@@ -20,11 +23,12 @@ pub struct FunctionDef(pub Symbol, pub Lambda);
 pub enum Ast {
     Var(Symbol),
     Const(Constant),
+    Value(Value),
     // If(Box<Ast>, Box<Ast>, Box<Ast>),
     Cond(Cond),
     Lets(Lets),
     Begin(Vec<Ast>),
-    Lambda(Box<Callable>),
+    Lambda(Arc<Lambda>),
     Call(Call),
 }
 
@@ -37,9 +41,11 @@ pub enum Params {
     Pair(Pair<Params>),
 }
 
-
 #[derive(Debug, Clone)]
-pub struct Cond(pub Vec<(Ast, Ast)>, pub Option<Box<Ast>>);
+pub struct Cond(
+    pub Vec<(Ast, Ast)>,
+    // pub Option<Box<Ast>>
+);
 
 #[derive(Debug, Clone)]
 pub struct Lets(pub Vec<(Symbol, Ast)>, pub Box<Ast>);

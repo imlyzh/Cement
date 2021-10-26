@@ -1,7 +1,6 @@
 mod ast;
-mod value_model;
-mod native_model;
 mod env;
+mod runtime;
 mod type_infer;
 mod partial_evaluation;
 mod codegen;

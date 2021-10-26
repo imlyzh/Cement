@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use sexpr_ir::gast::constant::Constant;
 
-use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params, callable::{Callable, Lambda, Pattern}}, env::Env};
+use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params, callable::{Lambda, Pattern}}, env::Env};
 
 use self::types::{CallableType, Type};
 
@@ -24,13 +24,16 @@ impl TypeInfer for Ast {
             Ast::Begin(e) => e.iter().map(|x| x.type_infer(env.clone())).last().unwrap_or(Type::Nil),
             Ast::Lambda(c) => c.type_infer(env),
             Ast::Call(c) => c.type_infer(env),
+            Ast::Value(_) => todo!("runtime value is not support"),
         }
     }
 }
 
 impl TypeInfer for Cond {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
-        let Cond(cond_exprs, else_expr) = self;
+        let Cond(cond_exprs,
+            // else_expr
+        ) = self;
         for i in cond_exprs.iter().map(|(x, _)|x) {
             i.type_infer(env.clone());
         }
@@ -38,9 +41,11 @@ impl TypeInfer for Cond {
             .iter()
             .map(|(_, x)|x.type_infer(env.clone()))
             .collect();
+        /*
         else_expr
             .iter()
             .for_each(|x| rts.push(x.type_infer(env.clone())));
+        // */
         // reduce rts
         rts.into_iter().reduce(Type::union).unwrap_or(Type::Nil)
     }
@@ -80,14 +85,16 @@ impl TypeInfer for Params {
     }
 }
 
+/*
 impl TypeInfer for Callable {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         match self {
-            Callable::Lambda(l) => l.type_infer(env),
-            Callable::NativeInterface(n) => Type::Callable(n.type_.clone()),
+            Lambda::Lambda(l) => l.type_infer(env),
+            Lambda::NativeInterface(n) => Type::Callable(n.type_.clone()),
         }
     }
 }
+*/
 
 impl TypeInfer for Lambda {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
