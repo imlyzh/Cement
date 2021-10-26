@@ -62,8 +62,12 @@ impl TypeInfer for Call {
         let Call(callee, params) = self;
         let funtype = callee.type_infer(env.clone());
         let paramstype = params.type_infer(env);
-        // check if callee is a function
-        todo!()
+        if let Type::Callable(CallableType(p, t)) = funtype {
+            // p and params type union
+            *t
+        } else {
+            panic!("error") // todo
+        }
     }
 }
 
@@ -101,7 +105,7 @@ impl TypeInfer for Pattern {
             Pattern::Ignore => Type::Any,
             Pattern::Const(c) => c.type_infer(env),
             Pattern::Var(s) => {
-                env.add(s.clone(), Type::Any);
+                // env.add(s.clone(), Type::Any);
                 Type::Any
             },
             Pattern::Pair(p) => p.type_infer(env),
