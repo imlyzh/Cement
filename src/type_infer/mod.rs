@@ -42,7 +42,7 @@ impl TypeInfer for Cond {
             .iter()
             .for_each(|x| rts.push(x.type_infer(env.clone())));
         // reduce rts
-        todo!()
+        rts.into_iter().reduce(Type::union).unwrap_or(Type::Nil)
     }
 }
 
