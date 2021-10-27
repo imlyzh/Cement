@@ -108,8 +108,12 @@ impl PartialEval for Call {
         let callee = callee.partial_eval(env.clone());
         let params = params.partial_eval(env);
         match callee {
-            Ok(v) => if let Value::Closure(c, ns) = v {
-                c.partial_call(ns, params)
+            Ok(v) => if let Value::Closure(c, ns) = v.clone() {
+                if let Some(x) = c.partial_call(ns, params.clone()) {
+                    x
+                } else {
+                    Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
+                }
             } else if let Value::NativeInterface(ni) = v.clone() {
                 if ni.is_pure {
                     let p = params.clone().to_value();
@@ -120,7 +124,7 @@ impl PartialEval for Call {
                             return Ok(r);
                         }
                     } else if ni.pe.is_some() {
-                        return ni.partial_call(Arc::new(NameSpace::default()), params);
+                        return ni.partial_call(Arc::new(NameSpace::default()), params).unwrap();
                     }
                 }
                 Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
