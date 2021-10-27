@@ -33,10 +33,7 @@ impl PartialEval for Ast {
                     if r.is_empty() {
                         e
                     } else {
-                        let e = match e {
-                            Ok(v) => Ast::Value(v),
-                            Err(v) => v,
-                        };
+                        let e = result2ast(e);
                         r.push(e);
                         Err(Ast::Begin(r))
                     }
@@ -56,14 +53,24 @@ impl PartialEval for Cond {
         ) = self;
         let pairs: Vec<_> = pairs
             .iter()
-            .map(|(k, v)| (k.partial_eval(env.clone()), v.partial_eval(env.clone())))
+            .map(|(k, v)| (k.partial_eval(env.clone()), v))
             .collect();
-        let r: Vec<Ast> = pairs
+        let pe_count = pairs
             .iter()
-            .filter(|(x, y)| x.is_err() || y.is_err())
-            .map(|(x, y)| (x.unwrap_err(), ))
+            .filter(|(c, _)| c.is_err())
+            .count();
+        if pe_count == 0 {
+            for (c, v) in pairs.clone() {
+                if let Value::Const(Constant::Bool(true)) = c.unwrap() {
+                    return v.partial_eval(env);
+                }
+            }
+        }
+        let pairs: Vec<_> = pairs
+            .iter()
+            .map(|(k, v)| (result2ast(k.clone()), result2ast(v.partial_eval(env.clone()))))
             .collect();
-        todo!()
+            Err(Ast::Cond(Cond(pairs)))
     }
 }
 
@@ -86,12 +93,19 @@ impl PartialEval for Lets {
         if let_item.is_empty() {
             e
         } else {
-            let e = match e {
-                Ok(v) => Ast::Value(v),
-                Err(v) => v,
-            };
+            let e = result2ast(e);
             let r = Ast::Lets(Lets(let_item, Box::new(e)));
             Err(r)
         }
+    }
+}
+
+
+
+#[inline]
+fn result2ast(e: Result<Value, Ast>) -> Ast {
+    match e {
+        Ok(v) => Ast::Value(v),
+        Err(v) => v,
     }
 }
