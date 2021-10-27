@@ -1,8 +1,10 @@
+pub mod call;
+
 use std::sync::Arc;
 
 use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
-use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params}, runtime::{NameSpace, value::Value}};
+use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params}, partial_evaluation::call::PartialCall, runtime::{NameSpace, value::Value}};
 
 
 
@@ -105,21 +107,48 @@ impl PartialEval for Call {
         let Call(callee, params) = self;
         let callee = callee.partial_eval(env.clone());
         let params = params.partial_eval(env);
-        todo!()
+        match callee {
+            Ok(v) => if let Value::Closure(c, ns) = v {
+                c.partial_call(ns, params)
+            } else {
+                Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
+            },
+            Err(f) => Err(Ast::Call(Call(Box::new(f), params.to_ast()))),
+        }
     }
 }
 
-impl PartialEval for Pair<Params<Ast>> {
-    fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
+impl Pair<Params<Ast>> {
+    fn partial_eval(&self, env: Arc<NameSpace>) -> Pair<Params<Result<Value, Ast>>> {
         let Pair(car, cdr) = self;
-        // car.partial_eval(env)
-        todo!()
+        let car = car.partial_eval(env.clone());
+        let cdr = cdr.as_ref().map(|cdr| Box::new(cdr.partial_eval(env.clone())));
+        Pair(Box::new(car), cdr)
     }
 }
 
-impl PartialEval for Params<Ast> {
-    fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
-        todo!()
+impl Params<Ast> {
+    fn partial_eval(&self, env: Arc<NameSpace>) -> Params<Result<Value, Ast>> {
+        match self {
+            Params::Value(v) => Params::Value(v.partial_eval(env)),
+            Params::Pair(v) => Params::Pair(v.partial_eval(env)),
+        }
+    }
+}
+
+impl Pair<Params<Result<Value, Ast>>> {
+    fn to_ast(self) -> Pair<Params<Ast>> {
+        let Pair(car, cdr) = self;
+        Pair(Box::new(car.to_ast()), cdr.map(|x| Box::new(x.to_ast())))
+    }
+}
+
+impl Params<Result<Value, Ast>> {
+    fn to_ast(self) -> Params<Ast> {
+        match self {
+            Params::Value(v) => Params::Value(result2ast(v)),
+            Params::Pair(v) => Params::Pair(v.to_ast()),
+        }
     }
 }
 
