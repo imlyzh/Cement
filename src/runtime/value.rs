@@ -11,7 +11,7 @@ use super::NameSpace;
 #[derive(Debug, Clone)]
 pub enum Value {
     Const(Constant),
-    Pair(Pair<Value>),
+    Pair(Arc<Value>, Arc<Value>),
     Closure(Arc<Lambda>, Arc<NameSpace>),
     NativeInterface(NativeInterface)
 }
@@ -28,7 +28,7 @@ pub struct NativeInterface {
 
 
 // low level native interface
-type LLNI = fn(); // todo
+// type LLNI = fn(); // todo
 
 // high level native interface
 type HLNI = fn(Value) -> Result<Value, ()>;

@@ -114,9 +114,11 @@ impl PartialEval for Call {
                 if ni.is_pure {
                     let p = params.clone().to_value();
                     if let Some(p) = p {
-                        // Degenerate to normal eval/apply
-                        todo!("get params")
-                        // (ni.ptr)(p)
+                        let r = (ni.ptr)(p.to_value());
+                        if let Ok(r) = r {
+                            // Degenerate to normal eval/apply
+                            return Ok(r);
+                        }
                     } else if ni.pe.is_some() {
                         return ni.partial_call(Arc::new(NameSpace::default()), params);
                     }
@@ -174,6 +176,24 @@ impl Params<Result<Value, Ast>> {
         match self {
             Params::Value(v) => v.ok().map(Params::Value),
             Params::Pair(v) => Some(Params::Pair(v.to_value()?)),
+        }
+    }
+}
+
+impl Pair<Params<Value>> {
+    pub fn to_value(self) -> Value {
+        let Pair(car, cdr) = self;
+        let car = car.to_value();
+        let cdr = cdr.map(|x| x.to_value()).unwrap_or(Value::Const(Constant::Nil));
+        Value::Pair(Arc::new(car), Arc::new(cdr))
+    }
+}
+
+impl Params<Value> {
+    pub fn to_value(self) -> Value {
+        match self {
+            Params::Value(v) => v,
+            Params::Pair(v) => v.to_value(),
         }
     }
 }
