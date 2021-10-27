@@ -33,12 +33,12 @@ pub enum Ast {
 }
 
 #[derive(Debug, Clone)]
-pub struct Call(pub Box<Ast>, pub Pair<Params>);
+pub struct Call(pub Box<Ast>, pub Pair<Params<Ast>>);
 
 #[derive(Debug, Clone)]
-pub enum Params {
-    Value(Ast),
-    Pair(Pair<Params>),
+pub enum Params<T> {
+    Value(T),
+    Pair(Pair<Params<T>>),
 }
 
 #[derive(Debug, Clone)]

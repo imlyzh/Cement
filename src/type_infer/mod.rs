@@ -76,7 +76,7 @@ impl TypeInfer for Call {
     }
 }
 
-impl TypeInfer for Params {
+impl TypeInfer for Params<Ast> {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         match self {
             Params::Value(v) => v.type_infer(env),

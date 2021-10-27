@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
-use crate::{ast::{Ast, Cond, Lets}, runtime::{NameSpace, value::Value}};
+use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params}, runtime::{NameSpace, value::Value}};
 
 
 
@@ -41,7 +41,7 @@ impl PartialEval for Ast {
             }
             Ast::Cond(c) => c.partial_eval(env),
             Ast::Lets(l) => l.partial_eval(env),
-            Ast::Call(_c) => todo!(),
+            Ast::Call(c) => c.partial_eval(env),
         }
     }
 }
@@ -100,6 +100,28 @@ impl PartialEval for Lets {
     }
 }
 
+impl PartialEval for Call {
+    fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
+        let Call(callee, params) = self;
+        let callee = callee.partial_eval(env.clone());
+        let params = params.partial_eval(env);
+        todo!()
+    }
+}
+
+impl PartialEval for Pair<Params<Ast>> {
+    fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
+        let Pair(car, cdr) = self;
+        // car.partial_eval(env)
+        todo!()
+    }
+}
+
+impl PartialEval for Params<Ast> {
+    fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
+        todo!()
+    }
+}
 
 
 #[inline]
