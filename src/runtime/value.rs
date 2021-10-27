@@ -1,9 +1,9 @@
 
 use std::sync::Arc;
 
-use sexpr_ir::gast::constant::Constant;
+use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
-use crate::{ast::{Pair, callable::Lambda}, type_infer::types::CallableType};
+use crate::{ast::{Ast, Pair, Params, callable::Lambda}, type_infer::types::CallableType};
 
 use super::NameSpace;
 
@@ -13,12 +13,15 @@ pub enum Value {
     Const(Constant),
     Pair(Pair<Value>),
     Closure(Arc<Lambda>, Arc<NameSpace>),
+    NativeInterface(NativeInterface)
 }
 
 
 #[derive(Debug, Clone)]
 pub struct NativeInterface {
     pub ptr: HLNI,
+    pub pe: Option<PENI>,
+    pub name: Symbol,
     pub is_pure: bool,
     pub type_: CallableType,
 }
@@ -29,3 +32,6 @@ type LLNI = fn(); // todo
 
 // high level native interface
 type HLNI = fn(Value) -> Result<Value, ()>;
+
+// partial eval native interface
+type PENI = fn(Pair<Params<Result<Value, Ast>>>) -> Result<Value, Ast>;

@@ -110,6 +110,18 @@ impl PartialEval for Call {
         match callee {
             Ok(v) => if let Value::Closure(c, ns) = v {
                 c.partial_call(ns, params)
+            } else if let Value::NativeInterface(ni) = v.clone() {
+                if ni.is_pure {
+                    let p = params.clone().to_value();
+                    if let Some(p) = p {
+                        // Degenerate to normal eval/apply
+                        todo!("get params")
+                        // (ni.ptr)(p)
+                    } else if ni.pe.is_some() {
+                        return ni.partial_call(Arc::new(NameSpace::default()), params);
+                    }
+                }
+                Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
             } else {
                 Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
             },
@@ -137,17 +149,31 @@ impl Params<Ast> {
 }
 
 impl Pair<Params<Result<Value, Ast>>> {
-    fn to_ast(self) -> Pair<Params<Ast>> {
+    pub fn to_ast(self) -> Pair<Params<Ast>> {
         let Pair(car, cdr) = self;
         Pair(Box::new(car.to_ast()), cdr.map(|x| Box::new(x.to_ast())))
+    }
+
+    pub fn to_value(self) -> Option<Pair<Params<Value>>> {
+        let Pair(car, cdr) = self;
+        let car = car.to_value()?;
+        let cdr = cdr.map(|x| x.to_value())?;
+        Some(Pair(Box::new(car), cdr.map(|x| Box::new(x))))
     }
 }
 
 impl Params<Result<Value, Ast>> {
-    fn to_ast(self) -> Params<Ast> {
+    pub fn to_ast(self) -> Params<Ast> {
         match self {
             Params::Value(v) => Params::Value(result2ast(v)),
             Params::Pair(v) => Params::Pair(v.to_ast()),
+        }
+    }
+
+    pub fn to_value(self) -> Option<Params<Value>> {
+        match self {
+            Params::Value(v) => v.ok().map(Params::Value),
+            Params::Pair(v) => Some(Params::Pair(v.to_value()?)),
         }
     }
 }
