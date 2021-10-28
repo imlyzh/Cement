@@ -7,8 +7,9 @@ use crate::runtime::value::Value;
 use super::{Ast, Pair, Params};
 
 
+/// Lambda(params, is_var_len, capture, body)
 #[derive(Debug, Clone)]
-pub struct Lambda(pub Pair<Pattern>, pub Ast);
+pub struct Lambda(pub Vec<Symbol>, pub bool, pub Vec<Symbol>, pub Ast);
 
 
 #[derive(Debug, Clone)]

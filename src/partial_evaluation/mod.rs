@@ -1,6 +1,6 @@
 pub mod call;
 
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
@@ -18,7 +18,10 @@ impl PartialEval for Ast {
             Ast::Value(v) => Ok(v.clone()),
             Ast::Const(v) => Ok(Value::Const(v.clone())),
             Ast::Var(k) => env.get_item(k).ok_or(self.clone()),
-            Ast::Lambda(l) => Ok(Value::Closure(l.clone(), env.clone())),
+            Ast::Lambda(l) => {
+                // todo: closure free var
+                Ok(Value::Closure(l.clone(), env.clone()))
+            },
             Ast::Begin(b) => {
                 if b.len() == 0 {
                     Ok(Value::Const(Constant::Nil))
@@ -106,36 +109,55 @@ impl PartialEval for Call {
     fn partial_eval(&self, env: Arc<NameSpace>) -> Result<Value, Ast> {
         let Call(callee, params) = self;
         let callee = callee.partial_eval(env.clone());
-        let params = params.partial_eval(env);
-        match callee {
-            Ok(v) => if let Value::Closure(c, ns) = v.clone() {
-                if let Some(x) = c.partial_call(ns, params.clone()) {
-                    x
-                } else {
-                    Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
-                }
-            } else if let Value::NativeInterface(ni) = v.clone() {
-                if ni.is_pure {
-                    let p = params.clone().to_value();
-                    if let Some(p) = p {
-                        let r = (ni.ptr)(p.to_value());
-                        if let Ok(r) = r {
-                            // Degenerate to normal eval/apply
-                            return Ok(r);
-                        }
-                    } else if ni.pe.is_some() {
-                        return ni.partial_call(Arc::new(NameSpace::default()), params).unwrap();
-                    }
-                }
-                Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
-            } else {
-                Err(Ast::Call(Call(Box::new(Ast::Value(v)), params.to_ast())))
-            },
-            Err(f) => Err(Ast::Call(Call(Box::new(f), params.to_ast()))),
+        let params = params
+            .iter()
+            .map(|x| x.partial_eval(env.clone()));
+        // if callee is not completed eval
+        if let Err(f) = &callee {
+            return Err(Ast::Call(Call(Box::new(f.clone()), params.map(result2ast).collect())))
         }
+        let params: Vec<_> = params.collect();
+        let partial_eval_params: Vec<Ast> = params
+            .iter()
+            .filter(|x| x.is_err())
+            .map(|x| x.clone().unwrap_err())
+            .collect();
+        // if callee is not callable then return
+        let (l, env) = if let Ok(Value::Closure(l, env)) = &callee {
+            (l, env)
+        } else if let Ok(Value::NativeInterface(l )) = &callee {
+            if !l.is_pure {
+                return Err(Ast::Call(Call(Box::new(callee.unwrap_err()), params.into_iter().map(result2ast).collect())));
+            }
+            if partial_eval_params.is_empty() {
+                let p: Vec<Value> = params
+                .iter()
+                .map(|x| x.clone().unwrap())
+                .collect();
+                if let Ok(r) = (l.ptr)(p) {
+                    return Ok(r)
+                }
+                return Err(Ast::Call(Call(Box::new(callee.unwrap_err()), params.into_iter().map(result2ast).collect())));
+            }
+            if let Some(pe) = l.pe {
+                return (pe)(params);
+            }
+            return Err(Ast::Call(Call(Box::new(callee.unwrap_err()), params.into_iter().map(result2ast).collect())));
+        } else {
+            return Err(Ast::Call(Call(Box::new(callee.unwrap_err()), params.into_iter().map(result2ast).collect())))
+        };
+        // if params len error
+        if (l.1 && params.len() < l.0.len() - 1) ||
+            params.len() != l.0.len() {
+                return Err(Ast::Call(Call(
+                    Box::new(callee.unwrap_err()),
+                    params.into_iter().map(result2ast).collect())))
+        }
+        // if not is completed eval then currying:)
+        l.clone().partial_call(env.clone(), params)
     }
 }
-
+/*
 impl Pair<Params<Ast>> {
     fn partial_eval(&self, env: Arc<NameSpace>) -> Pair<Params<Result<Value, Ast>>> {
         let Pair(car, cdr) = self;
@@ -200,7 +222,7 @@ impl Params<Value> {
             Params::Pair(v) => v.to_value(),
         }
     }
-}
+} */
 
 
 #[inline]

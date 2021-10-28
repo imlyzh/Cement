@@ -41,5 +41,6 @@ impl Type {
     }
 }
 
+/// CallableType ([params type], is_var_len, return type)
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CallableType(pub Box<Type>, pub Box<Type>);
+pub struct CallableType(pub Vec<Type>, pub bool, pub Box<Type>);

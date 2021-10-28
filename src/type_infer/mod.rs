@@ -66,9 +66,13 @@ impl TypeInfer for Call {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
         let Call(callee, params) = self;
         let funtype = callee.type_infer(env.clone());
-        let paramstype = params.type_infer(env);
-        if let Type::Callable(CallableType(p, t)) = funtype {
+        let paramstype: Vec<Type> = params
+            .iter()
+            .map(|x| x.type_infer(env.clone()))
+            .collect();
+        if let Type::Callable(CallableType(p, is_var_len, t)) = funtype {
             // p and params type union
+            // todo!
             *t
         } else {
             panic!("error") // todo
@@ -98,11 +102,12 @@ impl TypeInfer for Callable {
 
 impl TypeInfer for Lambda {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
-        let Lambda(params, body) = self;
+        let Lambda(params, is_var_len, capture_var, body) = self;
         let env = Arc::new(env.new_level());
         let return_type = Box::new(body.type_infer(env.clone()));
-        let args_type = Box::new(params.type_infer(env));
-        Type::Callable(CallableType(args_type, return_type))
+        // let args_type = params.iter(Box::new(params.type_infer(env)));
+        // Type::Callable(CallableType(args_type, is_var_len, return_type))
+        todo!()
     }
 }
 

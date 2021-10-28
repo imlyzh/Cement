@@ -12,6 +12,9 @@ impl<T> Env<T> {
     pub fn new() -> Self {
         Self(Arc::new(RwLock::new(HashMap::new())), None)
     }
+    pub fn from(i: HashMap<Symbol, T>, parent: Arc<Env<T>>) -> Self {
+        Self(Arc::new(RwLock::new(i)), Some(parent))
+    }
 }
 
 impl<T: Clone> Env<T> {

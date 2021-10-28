@@ -31,7 +31,7 @@ pub struct NativeInterface {
 // type LLNI = fn(); // todo
 
 // high level native interface
-type HLNI = fn(Value) -> Result<Value, ()>;
+type HLNI = fn(Vec<Value>) -> Result<Value, ()>;
 
 // partial eval native interface
-type PENI = fn(Pair<Params<Result<Value, Ast>>>) -> Result<Value, Ast>;
+type PENI = fn(Vec<Result<Value, Ast>>) -> Result<Value, Ast>;
