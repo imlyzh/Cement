@@ -59,7 +59,9 @@ raw_ast =
 }
 
 lets = {
-    "let" ~ let_pairs ~ "in" ~ ast
+    "let" ~ let_pairs
+    // ~ "in"
+    ~ ast
 }
 
 let_pairs = {
@@ -76,7 +78,7 @@ cond = {
 }
 
 cond_pairs = {
-    cond_pair ~ (";" ~ cond_pair)*
+    "{" ~ cond_pair ~ (";" ~ cond_pair)* ~ ";"? ~ "}"
 }
 
 cond_pair = {
