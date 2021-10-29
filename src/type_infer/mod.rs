@@ -37,7 +37,7 @@ impl TypeInfer for Cond {
         for i in cond_exprs.iter().map(|(x, _)|x) {
             i.type_infer(env.clone());
         }
-        let mut rts: Vec<Type> = cond_exprs
+        let rts: Vec<Type> = cond_exprs
             .iter()
             .map(|(_, x)|x.type_infer(env.clone()))
             .collect();
