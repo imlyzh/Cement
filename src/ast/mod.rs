@@ -13,6 +13,7 @@ use super::runtime::value::Value;
 pub enum TopLevel {
     Import(Vec<Symbol>),
     FunctionDef(FunctionDef),
+    // VarDef(Symbol, Constant),
     Macro(Macro),
 }
 

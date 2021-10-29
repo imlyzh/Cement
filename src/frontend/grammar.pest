@@ -1,0 +1,164 @@
+
+module = {
+	module_item* ~ EOI
+}
+
+module_item =
+    { import
+    | fundef
+    | macrodef
+    }
+
+
+import = { "import" ~ path }
+
+path = { symbol ~ ("." ~ symbol)* }
+
+macrodef =
+    { proc_macro_def
+    //| macro_def
+    }
+
+proc_macro_def = {
+    "proc_macro" ~ symbol ~ "(" ~ params ~ ")" ~ "=" ~ ast
+}
+
+fundef = {
+    "def" ~ symbol ~ "(" ~ params ~ ")" ~ "=" ~ ast
+}
+
+lambda = {
+    "(" ~ params ~ ")" ~ "=>" ~ ast
+}
+
+params = {
+    (symbol ~ ("," ~ ast)* ~ is_var_length?)?
+}
+
+is_var_length = {"..."}
+
+ast = {
+    raw_ast ~ call_params*
+}
+
+call_params = {
+    "(" ~ ast ~ ("," ~ ast)* ~ ")"
+}
+
+raw_ast =
+    { cond
+    | lets
+    | begin
+    | lambda
+    | consts
+    | symbol
+}
+
+lets = {
+    "let" ~ let_pairs ~ "in" ~ ast
+}
+
+let_pairs = {
+    let_pair ~ (";" ~ let_pair)*
+}
+
+let_pair = {
+    symbol ~ "=" ~ ast
+}
+
+cond = {
+    "cond" ~ cond_pairs ~ ("," ~ else_pair)?
+}
+
+cond_pairs = {
+    cond_pair ~ (";" ~ cond_pair)*
+}
+
+cond_pair = {
+    ast ~ "=>" ~ ast
+}
+
+else_pair = {
+    "else" ~ "=>" ~ ast
+}
+
+begin = {
+    "{" ~ (ast ~ (";" ~ ast)* ~ (";")?)? ~ "}"
+}
+
+consts =
+    { string_lit
+    | float
+    | int
+    | uint
+    | bool_lit
+    | nil_lit
+}
+
+keywords = { "def" | "cond" | "let" | "in" | "else" | "import" | "macro" | "proc_macro" | bool_lit | nil_lit }
+
+bool_lit = { "true" | "false" }
+
+nil_lit = {"nil"}
+
+////////////////////////////////////////
+
+symbol = $ { !keywords ~ (ASCII_ALPHA_LOWER | UNDERLINE) ~ (ASCII_ALPHANUMERIC | UNDERLINE)* }
+
+UNDERLINE = _{ "_" }
+
+// string
+
+string_lit = $ { "\"" ~ (escape | (!("\\" | "\"") ~ ANY)+)* ~ "\""}
+
+
+char = {
+    "'" ~ (escape | (!("\\" | "\"") ~ ANY)) ~ "'"
+}
+
+escape = _{ "\\\\"
+          | "\\\""
+          | "\\'"
+          | "\\n"
+          | "\\r"
+          | "\\t"
+          }
+
+// number
+
+int = ${ signed_number ~ "i"? }
+
+uint = ${ number ~ "u"? }
+
+float = ${ float_number ~ "f"? }
+
+
+float_number = $
+    { (("+" | "-")? ~ number_hex ~ "." ~ ASCII_HEX_DIGIT+)
+    | (("+" | "-")? ~ number_oct ~ "." ~ ASCII_OCT_DIGIT+)
+    | (("+" | "-")? ~ number_bin ~ "." ~ ASCII_BIN_DIGIT+)
+    | (("+" | "-")? ~ number_dec ~ "." ~ ASCII_DIGIT+)
+}
+
+signed_number = ${ ("+" | "-")? ~ number }
+
+number = $
+    { number_hex
+    | number_oct
+    | number_bin
+    | number_dec
+    }
+
+number_dec = _ { ASCII_DIGIT+ }
+number_oct = _ { "0o" ~ ASCII_OCT_DIGIT+ }
+number_hex = _ { "0x" ~ ASCII_HEX_DIGIT+ }
+number_bin = _ { "0b" ~ ASCII_BIN_DIGIT+ }
+
+
+WHITESPACE = _ { " "
+               | "\t"
+               | WHITE_SPACE
+               | NEWLINE
+               }
+
+COMMENT = _ { "//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE? }
