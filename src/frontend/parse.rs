@@ -11,7 +11,7 @@ use pest_derive::*;
 use sexpr_ir::gast::constant::Constant;
 use sexpr_ir::gast::symbol::{Location, Symbol};
 
-use crate::ast::{Ast, Cond, FunctionDef, Lets, TopLevel};
+use crate::ast::{Ast, Call, Cond, FunctionDef, Lets, TopLevel};
 use crate::ast::callable::Lambda;
 
 
@@ -69,18 +69,48 @@ impl ParseFrom<Rule> for Ast {
         let mut pairs = pair.into_inner();
         let pair = pairs.next().unwrap();
         let pair = pair.into_inner().next().unwrap();
-        let r = match pair.as_rule() {
-            Rule::cond => Ast::Cond(Cond::parse_from(pair, path)),
-            Rule::lets => Ast::Lets(Lets::parse_from(pair, path)),
-            Rule::begin => begin_parse_from(pair, path),
-            Rule::lambda => Ast::Lambda(Arc::new(Lambda::parse_from(pair, path))),
-            Rule::consts => Ast::Const(Constant::parse_from(pair, path)),
-            Rule::symbol => Ast::Var(Symbol::parse_from(pair, path)),
+        let mut r = match pair.as_rule() {
+            Rule::cond => Ast::Cond(Cond::parse_from(pair, path.clone())),
+            Rule::lets => Ast::Lets(Lets::parse_from(pair, path.clone())),
+            Rule::begin => begin_parse_from(pair, path.clone()),
+            Rule::lambda => Ast::Lambda(Arc::new(Lambda::parse_from(pair, path.clone()))),
+            Rule::consts => Ast::Const(Constant::parse_from(pair, path.clone())),
+            Rule::symbol => Ast::Var(Symbol::parse_from(pair, path.clone())),
             _ => unreachable!()
         };
-        // todo
+        for i in pairs {
+            debug_assert_eq!(i.as_rule(), Rule::ast_extend);
+            let i = i.into_inner().next().unwrap();
+            match i.as_rule() {
+                Rule::extend_call => {
+                    let (callee, mut params) = extend_call_parse_from(i, path.clone());
+                    params.insert(0, r);
+                    r = Ast::Call(Call(Box::new(callee), params));
+                },
+                Rule::call_params => {
+                    let params = call_params_parse_from(i, path.clone());
+                    r = Ast::Call(Call(Box::new(r), params));
+                },
+                _ => unreachable!()
+            }
+        }
         r
     }
+}
+
+fn extend_call_parse_from(pair: Pair<Rule>, path: Arc<String>) -> (Ast, Vec<Ast>) {
+    debug_assert_eq!(pair.as_rule(), Rule::extend_call);
+    let mut pairs = pair.into_inner();
+    let e = pairs.next().unwrap();
+    let p = pairs.next().unwrap();
+    let e = Ast::parse_from(e, path.clone());
+    let p = call_params_parse_from(p, path);
+    (e, p)
+}
+
+fn call_params_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Ast> {
+    debug_assert_eq!(pair.as_rule(), Rule::call_params);
+    pair.into_inner().map(|x| Ast::parse_from(x, path.clone())).collect()
 }
 
 impl ParseFrom<Rule> for Cond {
@@ -182,12 +212,16 @@ fn p_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Symbol> {
 fn begin_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Ast {
     debug_assert_eq!(pair.as_rule(), Rule::begin);
     let pairs = pair.into_inner();
-    let r = pairs.map(|x| Ast::parse_from(x, path.clone()));
-    Ast::Begin(r.collect())
+    let r: Vec<_> = pairs.map(|x| Ast::parse_from(x, path.clone())).collect();
+    if r.len() == 1 {
+        r.first().unwrap().clone()
+    } else {
+        Ast::Begin(r)
+    }
 }
 
 impl ParseFrom<Rule> for Constant {
-    fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
+    fn parse_from(pair: Pair<Rule>, _path: Arc<String>) -> Self {
         debug_assert_eq!(pair.as_rule(), Rule::consts);
         let pair = pair.into_inner().next().unwrap();
         match pair.as_rule() {

@@ -1,6 +1,6 @@
 
 def a() =
-    let id = (x) => x
+    let id = (x) => {}
     cond {
         false => id(0);
         true => id(1);

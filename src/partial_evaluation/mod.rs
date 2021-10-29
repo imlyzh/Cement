@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use sexpr_ir::gast::{constant::Constant, symbol::Symbol};
 
-use crate::{ast::{Ast, Call, Cond, Lets, Pair, Params}, partial_evaluation::call::PartialCall, runtime::{NameSpace, value::Value}};
+use crate::{ast::{Ast, Call, Cond, FunctionDef, Lets, Pair, Params, TopLevel}, partial_evaluation::call::PartialCall, runtime::{NameSpace, value::Value}};
 
 
 

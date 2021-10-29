@@ -42,7 +42,16 @@ params_ = {
 is_var_length = {"..."}
 
 ast = {
-    raw_ast ~ call_params*
+    raw_ast ~ ast_extend*
+}
+
+ast_extend =
+    { extend_call
+    | call_params
+    }
+
+extend_call = {
+    "." ~ ast ~ call_params
 }
 
 call_params = {
