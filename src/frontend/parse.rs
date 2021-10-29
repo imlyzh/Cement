@@ -9,8 +9,9 @@ use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest_derive::*;
 use sexpr_ir::gast::constant::Constant;
+use sexpr_ir::gast::symbol::{Location, Symbol};
 
-use crate::ast::{Ast, Cond, Lets};
+use crate::ast::{Ast, Cond, FunctionDef, Lets, TopLevel};
 use crate::ast::callable::Lambda;
 
 
@@ -27,6 +28,41 @@ where
     fn parse_from(pair: Pair<T>, path: Arc<String>) -> Self;
 }
 
+impl ParseFrom<Rule> for TopLevel {
+    fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
+        debug_assert_eq!(pair.as_rule(), Rule::module_item);
+        let pair = pair.into_inner().next().unwrap();
+        match pair.as_rule() {
+            Rule::import => TopLevel::Import(import_parse_from(pair, path)),
+            Rule::fundef => TopLevel::FunctionDef(FunctionDef::parse_from(pair, path)),
+            Rule::macrodef => todo!(),
+            _ => unreachable!()
+        }
+    }
+}
+
+fn import_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Symbol> {
+    debug_assert_eq!(pair.as_rule(), Rule::import);
+    let pair = pair.into_inner().next().unwrap();
+    debug_assert_eq!(pair.as_rule(), Rule::path);
+    pair.into_inner().map(|x| Symbol::parse_from(x, path.clone())).collect()
+}
+
+impl ParseFrom<Rule> for FunctionDef {
+    fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
+        debug_assert_eq!(pair.as_rule(), Rule::fundef);
+        let mut pairs = pair.into_inner();
+        let name = pairs.next().unwrap();
+        let params = pairs.next().unwrap();
+        let body = pairs.next().unwrap();
+        let name = Symbol::parse_from(name, path.clone());
+        let (params, is_var_length) = params_parse_from(params, path.clone());
+        let body = Ast::parse_from(body, path);
+        let l = Lambda(params, is_var_length, body);
+        FunctionDef(name, l)
+    }
+}
+
 impl ParseFrom<Rule> for Ast {
     fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
         debug_assert_eq!(pair.as_rule(), Rule::ast);
@@ -38,7 +74,7 @@ impl ParseFrom<Rule> for Ast {
             Rule::begin => begin_parse_from(pair, path),
             Rule::lambda => Ast::Lambda(Arc::new(Lambda::parse_from(pair, path))),
             Rule::consts => Ast::Const(Constant::parse_from(pair, path)),
-            Rule::symbol => todo!(),
+            Rule::symbol => Ast::Var(Symbol::parse_from(pair, path)),
             _ => unreachable!()
         };
         // todo
@@ -49,22 +85,97 @@ impl ParseFrom<Rule> for Ast {
 impl ParseFrom<Rule> for Cond {
     fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
         debug_assert_eq!(pair.as_rule(), Rule::cond);
-        todo!()
+        let mut pairs = pair.into_inner();
+        let pair = pairs.next().unwrap();
+        let r = cond_pairs_parse_from(pair, path);
+        Cond(r)
     }
 }
+
+fn cond_pairs_parse_from(i: Pair<Rule>, path: Arc<String>) -> Vec<(Ast, Ast)> {
+    debug_assert_eq!(i.as_rule(), Rule::cond_pairs);
+    i.into_inner().map(|x| cond_pair_parse_from(x, path.clone())).collect()
+}
+
+fn cond_pair_parse_from(i: Pair<Rule>, path: Arc<String>) -> (Ast, Ast) {
+    debug_assert_eq!(i.as_rule(), Rule::cond_pair);
+    let mut pairs = i.into_inner();
+    let a = pairs.next().unwrap();
+    let b = pairs.next().unwrap();
+    let a = Ast::parse_from(a, path.clone());
+    let b = Ast::parse_from(b, path);
+    (a, b)
+}
+
 
 impl ParseFrom<Rule> for Lets {
     fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
         debug_assert_eq!(pair.as_rule(), Rule::lets);
-        todo!()
+        let mut pairs = pair.into_inner();
+        let pair = pairs.next().unwrap();
+        let r = let_pairs_parse_from(pair, path.clone());
+        let body = Ast::parse_from(pairs.next().unwrap(), path);
+        Lets(r, Box::new(body))
+    }
+}
+
+fn let_pairs_parse_from(i: Pair<Rule>, path: Arc<String>) -> Vec<(Symbol, Ast)> {
+    debug_assert_eq!(i.as_rule(), Rule::let_pairs);
+    i.into_inner().map(|x| let_pair_parse_from(x, path.clone())).collect()
+}
+
+fn let_pair_parse_from(i: Pair<Rule>, path: Arc<String>) -> (Symbol, Ast) {
+    debug_assert_eq!(i.as_rule(), Rule::let_pair);
+    let mut pairs = i.into_inner();
+    let a = pairs.next().unwrap();
+    let b = pairs.next().unwrap();
+    let a = Symbol::parse_from(a, path.clone());
+    let b = Ast::parse_from(b, path);
+    (a, b)
+}
+
+impl ParseFrom<Rule> for Symbol {
+    fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
+        debug_assert_eq!(pair.as_rule(), Rule::symbol);
+        let (line, colum) = pair.as_span().start_pos().line_col();
+        let pos = pair.as_span().start_pos().pos();
+        let loc = Location { path, line, colum, pos };
+        Symbol::from(pair.as_str(), &loc)
     }
 }
 
 impl ParseFrom<Rule> for Lambda {
     fn parse_from(pair: Pair<Rule>, path: Arc<String>) -> Self {
         debug_assert_eq!(pair.as_rule(), Rule::lambda);
-        todo!()
+        let mut pairs = pair.into_inner();
+        let params = pairs.next().unwrap();
+        let body = pairs.next().unwrap();
+        let (params, is_var_length) = params_parse_from(params, path.clone());
+        let body = Ast::parse_from(body, path);
+        Lambda(params, is_var_length, body)
     }
+}
+
+fn params_parse_from(pair: Pair<Rule>, path: Arc<String>) -> (Vec<Symbol>, bool) {
+    debug_assert_eq!(pair.as_rule(), Rule::params);
+    let mut pairs = pair.into_inner();
+    let p = pairs.next();
+    if p.is_none() {
+        return (vec![], false)
+    }
+    let p = p.unwrap();
+    let p = p_parse_from(p, path);
+    let is_vl = pairs.next();
+    if is_vl.is_some() {
+        (p, true)
+    } else {
+        (p, false)
+    }
+}
+
+fn p_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Symbol> {
+    debug_assert_eq!(pair.as_rule(), Rule::params_);
+    pair.into_inner().map(|x| Symbol::parse_from(x, path.clone())).collect()
 }
 
 fn begin_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Ast {

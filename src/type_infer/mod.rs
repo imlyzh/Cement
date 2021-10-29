@@ -102,9 +102,9 @@ impl TypeInfer for Callable {
 
 impl TypeInfer for Lambda {
     fn type_infer(&self, env: Arc<Env<Type>>) -> Type {
-        let Lambda(params, is_var_len, capture_var, body) = self;
-        let env = Arc::new(env.new_level());
-        let return_type = Box::new(body.type_infer(env.clone()));
+        // let Lambda(params, is_var_len, capture_var, body) = self;
+        // let env = Arc::new(env.new_level());
+        // let return_type = Box::new(body.type_infer(env.clone()));
         // let args_type = params.iter(Box::new(params.type_infer(env)));
         // Type::Callable(CallableType(args_type, is_var_len, return_type))
         todo!()

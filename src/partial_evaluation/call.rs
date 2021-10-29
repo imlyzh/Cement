@@ -44,7 +44,7 @@ impl PartialCall for Lambda {
         .map(|(u, x)| (self.0.get(u).unwrap().clone(), x.clone().unwrap_err()))
         .collect();
         let env = Arc::new(Env::from(p, env));
-        match self.3.partial_eval(env) {
+        match self.2.partial_eval(env) {
             Ok(r) => Ok(r),
             Err(e) => {
                 let mut params_table: Vec<Symbol> = partial_eval_params.iter().map(|(k, _)| k.clone()).collect();
@@ -53,7 +53,7 @@ impl PartialCall for Lambda {
                 if self.1 {
                     params_table.push(self.0.last().unwrap().clone());
                 }
-                let fun = Lambda(params_table, self.1, self.2.clone(), e);
+                let fun = Lambda(params_table, self.1, e);
                 Err(Ast::Call(Call(
                     Box::new(Ast::Lambda(Arc::new(fun))),
                     params_body,

@@ -9,7 +9,7 @@ use super::{Ast, Pair, Params};
 
 /// Lambda(params, is_var_len, capture, body)
 #[derive(Debug, Clone)]
-pub struct Lambda(pub Vec<Symbol>, pub bool, pub Vec<Symbol>, pub Ast);
+pub struct Lambda(pub Vec<Symbol>, pub bool, pub Ast);
 
 
 #[derive(Debug, Clone)]

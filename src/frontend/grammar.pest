@@ -32,7 +32,11 @@ lambda = {
 }
 
 params = {
-    (symbol ~ ("," ~ ast)* ~ is_var_length?)?
+    (params_ ~ is_var_length?)?
+}
+
+params_ = {
+    symbol ~ ("," ~ symbol)*
 }
 
 is_var_length = {"..."}
@@ -67,7 +71,8 @@ let_pair = {
 }
 
 cond = {
-    "cond" ~ cond_pairs ~ ("," ~ else_pair)?
+    "cond" ~ cond_pairs
+    // ~ ("," ~ else_pair)?
 }
 
 cond_pairs = {
