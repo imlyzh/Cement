@@ -3,6 +3,17 @@ module = {
 	(!EOI ~ module_item)* ~ EOI
 }
 
+repl = {
+    (!EOI ~ repl_item)* ~ EOI
+}
+
+repl_item =
+    { import
+    | fundef
+    | macrodef
+    | ast
+    }
+
 module_item =
     { import
     | fundef
