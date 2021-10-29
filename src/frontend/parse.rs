@@ -68,6 +68,7 @@ impl ParseFrom<Rule> for Ast {
         debug_assert_eq!(pair.as_rule(), Rule::ast);
         let mut pairs = pair.into_inner();
         let pair = pairs.next().unwrap();
+        let pair = pair.into_inner().next().unwrap();
         let r = match pair.as_rule() {
             Rule::cond => Ast::Cond(Cond::parse_from(pair, path)),
             Rule::lets => Ast::Lets(Lets::parse_from(pair, path)),
@@ -199,4 +200,11 @@ impl ParseFrom<Rule> for Constant {
             _ => unreachable!()
         }
     }
+}
+
+pub fn parse_test(i: &str) -> Vec<TopLevel> {
+    let mut r = Cement::parse(Rule::module, i).unwrap();
+    let path = Arc::new("<test>".to_string());
+    let r = r.next().unwrap();
+    r.into_inner().filter(|x| x.as_rule() != Rule::EOI).map(|r| TopLevel::parse_from(r, path.clone())).collect()
 }
