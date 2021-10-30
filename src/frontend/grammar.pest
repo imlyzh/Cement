@@ -63,7 +63,7 @@ ast_extend =
     }
 
 extend_call = {
-    "." ~ ast ~ call_params
+    "." ~ symbol ~ call_params
 }
 
 call_params = {

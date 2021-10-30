@@ -85,7 +85,7 @@ impl ParseFrom<Rule> for Ast {
                 Rule::extend_call => {
                     let (callee, mut params) = extend_call_parse_from(i, path.clone());
                     params.insert(0, r);
-                    r = Ast::Call(Call(Box::new(callee), params));
+                    r = Ast::Call(Call(Box::new(Ast::Var(callee)), params));
                 },
                 Rule::call_params => {
                     let params = call_params_parse_from(i, path.clone());
@@ -98,12 +98,13 @@ impl ParseFrom<Rule> for Ast {
     }
 }
 
-fn extend_call_parse_from(pair: Pair<Rule>, path: Arc<String>) -> (Ast, Vec<Ast>) {
+fn extend_call_parse_from(pair: Pair<Rule>, path: Arc<String>) -> (Symbol, Vec<Ast>) {
     debug_assert_eq!(pair.as_rule(), Rule::extend_call);
     let mut pairs = pair.into_inner();
     let e = pairs.next().unwrap();
     let p = pairs.next().unwrap();
-    let e = Ast::parse_from(e, path.clone());
+    // let e = Ast::parse_from(e, path.clone());
+    let e = Symbol::parse_from(e, path.clone());
     let p = call_params_parse_from(p, path);
     (e, p)
 }

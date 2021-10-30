@@ -5,3 +5,9 @@ def a() =
         false => id(114);
         true => id(514);
     }
+
+// add const
+def mulc(x, c) = cond {
+    c.mod(2).eq(0) => x.lshift(c.log(2));
+    true => x.raw_mul(c);
+}
