@@ -2,6 +2,6 @@
 def a() =
     let id = (x) => x
     cond {
-        true => id(0);
-        true => id(1);
+        false => id(114);
+        true => id(514);
     }

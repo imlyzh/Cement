@@ -146,13 +146,6 @@ impl PartialEval for Call {
         } else {
             return Err(Ast::Call(Call(Box::new(callee.unwrap_err()), params.into_iter().map(result2ast).collect())))
         };
-        // if params len error
-        if (l.1 && params.len() < l.0.len() - 1) ||
-            params.len() != l.0.len() {
-                return Err(Ast::Call(Call(
-                    Box::new(callee.unwrap_err()),
-                    params.into_iter().map(result2ast).collect())))
-        }
         // if not is completed eval then currying:)
         l.clone().partial_call(env.clone(), params)
     }

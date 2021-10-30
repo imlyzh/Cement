@@ -56,9 +56,9 @@ impl ParseFrom<Rule> for FunctionDef {
         let params = pairs.next().unwrap();
         let body = pairs.next().unwrap();
         let name = Symbol::parse_from(name, path.clone());
-        let (params, is_var_length) = params_parse_from(params, path.clone());
+        let params = params_parse_from(params, path.clone());
         let body = Ast::parse_from(body, path);
-        let l = Lambda(params, is_var_length, body);
+        let l = Lambda(params, body);
         FunctionDef(name, l)
     }
 }
@@ -181,27 +181,30 @@ impl ParseFrom<Rule> for Lambda {
         let mut pairs = pair.into_inner();
         let params = pairs.next().unwrap();
         let body = pairs.next().unwrap();
-        let (params, is_var_length) = params_parse_from(params, path.clone());
+        let params = params_parse_from(params, path.clone());
         let body = Ast::parse_from(body, path);
-        Lambda(params, is_var_length, body)
+        Lambda(params, body)
     }
 }
 
-fn params_parse_from(pair: Pair<Rule>, path: Arc<String>) -> (Vec<Symbol>, bool) {
+fn params_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Symbol> {
     debug_assert_eq!(pair.as_rule(), Rule::params);
     let mut pairs = pair.into_inner();
     let p = pairs.next();
     if p.is_none() {
-        return (vec![], false)
+        return vec![]
     }
     let p = p.unwrap();
     let p = p_parse_from(p, path);
-    let is_vl = pairs.next();
+    // let is_vl = pairs.next();
+    /*
     if is_vl.is_some() {
         (p, true)
     } else {
         (p, false)
     }
+     */
+    p
 }
 
 fn p_parse_from(pair: Pair<Rule>, path: Arc<String>) -> Vec<Symbol> {

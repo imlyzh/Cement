@@ -21,7 +21,7 @@ fn main() {
     let env = Arc::new(NameSpace::new());
     for r in r {
         if let TopLevel::FunctionDef(FunctionDef(name, f)) = r {
-            let r = f.2.partial_eval(env.clone());
+            let r = f.1.partial_eval(env.clone());
             println!("partial_eval: {:?}", r);
         }
     }

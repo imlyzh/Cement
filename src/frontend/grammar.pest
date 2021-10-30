@@ -43,7 +43,8 @@ lambda = {
 }
 
 params = {
-    (params_ ~ is_var_length?)?
+    (params_ //~ is_var_length?
+    )?
 }
 
 params_ = {
