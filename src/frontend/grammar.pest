@@ -154,18 +154,15 @@ escape = _{ "\\\\"
 
 // number
 
-int = ${ signed_number ~ "i"? }
-
-uint = ${ number ~ "u"? }
-
-float = ${ float_number ~ "f"? }
-
+int_lit = ${ signed_number ~ !("u" | "f") ~ "i"? }
+uint_lit = ${ number ~ "u" }
+float_lit = ${ float_number ~ "f"? }
 
 float_number = $
-    { (("+" | "-")? ~ number_hex ~ "." ~ ASCII_HEX_DIGIT+)
-    | (("+" | "-")? ~ number_oct ~ "." ~ ASCII_OCT_DIGIT+)
-    | (("+" | "-")? ~ number_bin ~ "." ~ ASCII_BIN_DIGIT+)
-    | (("+" | "-")? ~ number_dec ~ "." ~ ASCII_DIGIT+)
+    { (("+" | "-")? ~ number_hex ~ ("." ~ ASCII_HEX_DIGIT+)?)
+    | (("+" | "-")? ~ number_oct ~ ("." ~ ASCII_OCT_DIGIT+)?)
+    | (("+" | "-")? ~ number_bin ~ ("." ~ ASCII_BIN_DIGIT+)?)
+    | (("+" | "-")? ~ number_dec ~ ("." ~ ASCII_DIGIT+)?)
 }
 
 signed_number = ${ ("+" | "-")? ~ number }
